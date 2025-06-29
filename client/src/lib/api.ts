@@ -1,27 +1,66 @@
 import { apiRequest } from "./queryClient";
 
 const API_BASE = "/api";
+const AUTH_API_BASE = "http://localhost:8000";
 
-// Auth API
+// Auth API - Connected to FastAPI backend
 export const authApi = {
   login: async (data: { email: string; password: string }) => {
-    const res = await apiRequest("POST", `${API_BASE}/auth/login`, data);
-    return res.json();
+    const response = await fetch(`${AUTH_API_BASE}/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.detail || "Error en el inicio de sesión");
+    }
+
+    const result = await response.json();
+    return { token: result.access_token, tokenType: result.token_type };
   },
   
   register: async (data: { name: string; email: string; password: string; confirmPassword: string }) => {
-    const res = await apiRequest("POST", `${API_BASE}/auth/register`, data);
-    return res.json();
+    const response = await fetch(`${AUTH_API_BASE}/auth/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.detail || "Error en el registro");
+    }
+
+    return response.json();
   },
   
   logout: async () => {
-    const res = await apiRequest("POST", `${API_BASE}/auth/logout`);
-    return res.json();
+    // JWT logout is handled client-side by removing the token
+    return { message: "Sesión cerrada exitosamente" };
   },
   
   me: async () => {
-    const res = await apiRequest("GET", `${API_BASE}/auth/me`);
-    return res.json();
+    const token = localStorage.getItem("jwt_token");
+    if (!token) return null;
+
+    const response = await fetch(`${AUTH_API_BASE}/auth/me`, {
+      headers: { 
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      },
+    });
+
+    if (!response.ok) {
+      if (response.status === 401) {
+        localStorage.removeItem("jwt_token");
+        return null;
+      }
+      throw new Error("Error al obtener datos del usuario");
+    }
+
+    return response.json();
   },
 };
 
