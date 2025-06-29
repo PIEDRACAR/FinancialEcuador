@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { CompanyProvider } from "@/contexts/CompanyContext";
+import { DashboardProvider } from "@/contexts/DashboardContext";
 import AuthGuard from "@/components/AuthGuard";
 import "./lib/auth"; // Initialize auth interceptor
 import LoginPage from "@/pages/LoginPage";
@@ -19,7 +20,9 @@ function DashboardWrapper({ children }: { children: React.ReactNode }) {
   return (
     <AuthGuard>
       <CompanyProvider>
-        {children}
+        <DashboardProvider>
+          {children}
+        </DashboardProvider>
       </CompanyProvider>
     </AuthGuard>
   );
