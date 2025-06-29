@@ -1,0 +1,93 @@
+# Prompt para la Creación de un Sistema Contable Completo para Ecuador (Backend-Agnóstico)
+
+## 1. Resumen del Proyecto
+
+Crear una aplicación web de sistema contable (SaaS) robusta, escalable y profesional, orientada al mercado ecuatoriano. La plataforma debe permitir a los usuarios gestionar la contabilidad de una o varias empresas de forma segura y eficiente. La arquitectura debe ser moderna, priorizando una experiencia de usuario fluida y una base de código mantenible. Este prompt define el **frontend** y asume la existencia de un **backend con una API RESTful** que maneja la base de datos y la autenticación.
+
+---
+
+## 2. Pila Tecnológica (Tech Stack)
+
+*   **Framework:** Next.js (con App Router)
+*   **Lenguaje:** TypeScript
+*   **UI Framework:** React
+*   **Componentes UI:** ShadCN UI
+*   **Estilos:** Tailwind CSS
+*   **Iconos:** `lucide-react`
+*   **Gestión de Estado de Servidor:** React Query o SWR (para fetching, caching, y mutación de datos)
+*   **Autenticación (Cliente):** Gestión de tokens JWT (almacenamiento en cookies httpOnly).
+*   **Validación de Formularios:** Zod y React Hook Form
+*   **Notificaciones:** Toasts (basados en los componentes de ShadCN)
+
+---
+
+## 3. Arquitectura Fundamental
+
+### 3.1. Cliente-Céntrica (`"use client"`)
+Esta es la decisión arquitectónica más crítica. Todas las páginas y componentes que necesiten interactuar con la API (leer o escribir datos) DEBEN ser "Componentes de Cliente" (`"use client"`). La carga de datos se realizará desde el navegador del usuario, mostrando esqueletos de carga (`skeletons`) para una mejor UX, mientras se realizan las peticiones a la API.
+
+### 3.2. Conexión a la API a Prueba de Balas
+Se debe crear un cliente de API centralizado (usando `fetch` o `axios`) que maneje la configuración base de la URL de la API desde variables de entorno. Este cliente debe interceptar respuestas para manejar errores de red y de autenticación de forma global, y adjuntar automáticamente los tokens de autenticación a las peticiones salientes.
+
+### 3.3. Gestión de Estado Centralizada
+Utilizar React Context API para gestionar el estado de la UI, como la información del usuario autenticado y, más importante, la empresa actualmente seleccionada. Crear un `CompanyProvider` que envuelva el layout del dashboard para hacer que los datos de la empresa (lista de empresas, empresa seleccionada) estén disponibles en toda la aplicación.
+
+### 3.4. Acciones de Servidor Seguras (o Mutaciones de API)
+Para todas las mutaciones de datos (crear, actualizar, eliminar), se deben definir funciones asíncronas que llamen a los endpoints correspondientes de la API REST.
+1.  Se debe validar el input del formulario en el cliente con Zod antes de enviar la petición.
+2.  La función debe manejar las respuestas de éxito o error de la API y mostrar notificaciones (toasts) al usuario.
+3.  Después de una mutación exitosa, se deben invalidar las queries de datos relacionadas para que la UI se actualice automáticamente (ej. React Query, SWR).
+
+---
+
+## 4. Características Principales
+
+### 4.1. Autenticación de Usuarios
+*   **Flujo Completo:** Implementar páginas para Iniciar Sesión, Registrarse y Recuperar Contraseña.
+*   **Seguridad:** La página de inicio de sesión enviará las credenciales a un endpoint `/api/auth/login`. Si es exitoso, el backend devolverá un JWT que se almacenará de forma segura. Todas las peticiones posteriores a endpoints protegidos incluirán este token.
+*   **Rutas Protegidas:** El dashboard y todas sus sub-páginas deben ser accesibles solo para usuarios autenticados. Crear un `AuthGuard` que verifique la validez del token y redirija a los usuarios no autenticados a la página de inicio de sesión.
+
+### 4.2. Sistema Multi-Empresa
+*   **Creación y Gestión:** Un usuario puede crear y pertenecer a múltiples empresas. La gestión se hará a través de endpoints como `/api/companies`.
+*   **Selector de Empresa (`CompanySwitcher`):** Un componente crucial en la barra de navegación principal. Debe permitir al usuario ver la empresa activa y cambiar fácilmente entre las empresas a las que tiene acceso.
+*   **Persistencia:** La selección de la empresa debe guardarse en `localStorage` para que la sesión del usuario recuerde qué empresa estaba activa.
+*   **Aislamiento de Datos:** La API del backend será responsable de garantizar que un usuario solo pueda acceder a los datos de sus propias empresas. El frontend enviará el `companyId` en las peticiones cuando sea necesario.
+
+### 4.3. Dashboard Principal
+*   **Layout Guardián:** El layout principal del dashboard (`/dashboard/layout.tsx`) debe ser el centro de control. Debe:
+    1.  Verificar la autenticación del usuario.
+    2.  Usar el `CompanyProvider` para cargar los datos de la empresa desde la API.
+    3.  Mostrar estados de carga mientras se obtienen los datos.
+*   **Estado de Bienvenida / Vacío:** La página principal del dashboard (`/dashboard/page.tsx`) debe ser inteligente.
+    *   Si un usuario no tiene empresas (la petición a `/api/companies` devuelve un array vacío), debe mostrar un mensaje claro y un botón para "Crear Empresa".
+    *   Si el usuario tiene empresas, debe mostrar un mensaje de bienvenida con el nombre de la empresa seleccionada.
+
+### 4.4. UI y UX
+*   **Diseño Limpio y Moderno:** Utilizar los componentes de ShadCN para una apariencia profesional y consistente.
+*   **Responsivo:** La aplicación debe ser usable en dispositivos móviles y de escritorio.
+*   **Feedback al Usuario:** Usar Toasts para notificar al usuario sobre el resultado de sus acciones (ej. "Empresa creada con éxito", "Error: el nombre es demasiado corto").
+*   **Estados de Carga:** No mostrar páginas en blanco. Usar `skeletons` y `spinners` para indicar que los datos se están cargando desde la API.
+
+---
+
+## 5. Modelo de Datos (Conceptual)
+
+La API debe exponer recursos que sigan una estructura similar a esta:
+*   `User`: { id, name, email }
+*   `Company`: { id, name, ownerId }
+*   `Client`: { id, name, ruc, address, companyId }
+*   `Invoice`: { id, number, date, total, clientId, companyId }
+
+---
+
+## 6. Guía de Implementación y Despliegue (`README.md`)
+El proyecto debe incluir un archivo `README.md` excepcionalmente claro y detallado. Este archivo debe guiar al usuario a través de:
+1.  **Configuración del Backend:** Instrucciones sobre cómo poner en marcha el servidor del backend (si aplica) o dónde encontrar la documentación de la API.
+2.  **Configuración del Entorno (`.env`):** Cómo llenar el archivo `.env` local con las variables necesarias, como `NEXT_PUBLIC_API_BASE_URL`.
+3.  **Despliegue en Vercel:** Cómo conectar el repositorio de GitHub a Vercel.
+4.  **PASO MÁS IMPORTANTE:** Cómo configurar las mismas variables de entorno (como `NEXT_PUBLIC_API_BASE_URL`) en el dashboard de Vercel para que el despliegue en producción pueda conectarse al backend correcto.
+
+---
+
+## 7. Idioma
+Todo el texto visible en la interfaz de usuario debe estar en **español**.
