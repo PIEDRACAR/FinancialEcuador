@@ -13,6 +13,12 @@ import RegisterPage from "@/pages/RegisterPage";
 import DashboardPage from "@/pages/DashboardPage";
 import ClientsPage from "@/pages/ClientsPage";
 import InvoicesPage from "@/pages/InvoicesPage";
+import ProformasPage from "@/pages/ProformasPage";
+import NotesPage from "@/pages/NotesPage";
+import RetentionsPage from "@/pages/RetentionsPage";
+import AccountingPage from "@/pages/AccountingPage";
+import EmployeesPage from "@/pages/EmployeesPage";
+import SRIPage from "@/pages/SRIPage";
 import ReportsPage from "@/components/ReportsPage";
 import SettingsPage from "@/components/SettingsPage";
 import NotFound from "@/pages/not-found";
@@ -53,6 +59,36 @@ function Router() {
       <Route path="/dashboard/reports">
         <DashboardWrapper>
           <ReportsPage />
+        </DashboardWrapper>
+      </Route>
+      <Route path="/dashboard/proformas">
+        <DashboardWrapper>
+          <ProformasPage />
+        </DashboardWrapper>
+      </Route>
+      <Route path="/dashboard/notes">
+        <DashboardWrapper>
+          <NotesPage />
+        </DashboardWrapper>
+      </Route>
+      <Route path="/dashboard/retentions">
+        <DashboardWrapper>
+          <RetentionsPage />
+        </DashboardWrapper>
+      </Route>
+      <Route path="/dashboard/accounting">
+        <DashboardWrapper>
+          <AccountingPage />
+        </DashboardWrapper>
+      </Route>
+      <Route path="/dashboard/employees">
+        <DashboardWrapper>
+          <EmployeesPage />
+        </DashboardWrapper>
+      </Route>
+      <Route path="/dashboard/sri">
+        <DashboardWrapper>
+          <SRIPage />
         </DashboardWrapper>
       </Route>
       <Route path="/dashboard/settings">

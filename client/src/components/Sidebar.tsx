@@ -1,4 +1,7 @@
-import { Building2, Calculator, LayoutDashboard, Users, Receipt, FileText, Settings, LogOut, User } from "lucide-react";
+import { 
+  Building2, Calculator, LayoutDashboard, Users, Receipt, FileText, Settings, LogOut, User,
+  BookOpen, TrendingDown, ClipboardList, Globe, PiggyBank
+} from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLocation } from "wouter";
 import CompanySwitcher from "./CompanySwitcher";
@@ -11,6 +14,12 @@ export default function Sidebar() {
     { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
     { icon: Users, label: "Clientes", path: "/dashboard/clients" },
     { icon: Receipt, label: "Facturas", path: "/dashboard/invoices" },
+    { icon: ClipboardList, label: "Proformas", path: "/dashboard/proformas" },
+    { icon: TrendingDown, label: "Notas Crédito/Débito", path: "/dashboard/notes" },
+    { icon: Calculator, label: "Comprobantes Retención", path: "/dashboard/retentions" },
+    { icon: BookOpen, label: "Contabilidad", path: "/dashboard/accounting" },
+    { icon: PiggyBank, label: "Empleados y Nómina", path: "/dashboard/employees" },
+    { icon: Globe, label: "SRI Ecuador", path: "/dashboard/sri" },
     { icon: FileText, label: "Reportes", path: "/dashboard/reports" },
     { icon: Settings, label: "Configuración", path: "/dashboard/settings" },
   ];
