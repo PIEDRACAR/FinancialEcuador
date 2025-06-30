@@ -1,12 +1,11 @@
 import { apiRequest } from "./queryClient";
 
 const API_BASE = "/api";
-const AUTH_API_BASE = "http://localhost:8000";
 
-// Auth API - Connected to FastAPI backend
+// Auth API - Connected to Express backend
 export const authApi = {
   login: async (data: { email: string; password: string }) => {
-    const response = await fetch(`${AUTH_API_BASE}/auth/login`, {
+    const response = await fetch(`${API_BASE}/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
@@ -14,15 +13,15 @@ export const authApi = {
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.detail || "Error en el inicio de sesión");
+      throw new Error(error.message || "Error en el inicio de sesión");
     }
 
     const result = await response.json();
-    return { token: result.access_token, tokenType: result.token_type };
+    return { token: result.token, user: result.user };
   },
   
   register: async (data: { name: string; email: string; password: string; confirmPassword: string }) => {
-    const response = await fetch(`${AUTH_API_BASE}/auth/register`, {
+    const response = await fetch(`${API_BASE}/auth/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
@@ -30,14 +29,20 @@ export const authApi = {
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.detail || "Error en el registro");
+      throw new Error(error.message || "Error en el registro");
     }
 
     return response.json();
   },
   
   logout: async () => {
-    // JWT logout is handled client-side by removing the token
+    const response = await fetch(`${API_BASE}/auth/logout`, {
+      method: "POST",
+      headers: { 
+        "Authorization": `Bearer ${localStorage.getItem("jwt_token")}`,
+        "Content-Type": "application/json" 
+      },
+    });
     return { message: "Sesión cerrada exitosamente" };
   },
   
@@ -45,7 +50,7 @@ export const authApi = {
     const token = localStorage.getItem("jwt_token");
     if (!token) return null;
 
-    const response = await fetch(`${AUTH_API_BASE}/auth/me`, {
+    const response = await fetch(`${API_BASE}/auth/me`, {
       headers: { 
         "Authorization": `Bearer ${token}`,
         "Content-Type": "application/json"
