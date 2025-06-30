@@ -67,6 +67,7 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
       .reduce((sum: number, invoice: Invoice) => sum + parseFloat(invoice.total || '0'), 0);
 
     const recentInvoices = invoiceList
+      .filter((invoice: Invoice) => invoice.date && !isNaN(new Date(invoice.date).getTime()))
       .sort((a: Invoice, b: Invoice) => new Date(b.date).getTime() - new Date(a.date).getTime())
       .slice(0, 5);
 
@@ -77,12 +78,16 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
     const currentYear = new Date().getFullYear();
     
     const currentMonthInvoices = invoiceList.filter((invoice: Invoice) => {
+      if (!invoice.date) return false;
       const invoiceDate = new Date(invoice.date);
+      if (isNaN(invoiceDate.getTime())) return false;
       return invoiceDate.getMonth() === currentMonth && invoiceDate.getFullYear() === currentYear;
     });
 
     const lastMonthInvoices = invoiceList.filter((invoice: Invoice) => {
+      if (!invoice.date) return false;
       const invoiceDate = new Date(invoice.date);
+      if (isNaN(invoiceDate.getTime())) return false;
       const lastMonth = currentMonth === 0 ? 11 : currentMonth - 1;
       const year = currentMonth === 0 ? currentYear - 1 : currentYear;
       return invoiceDate.getMonth() === lastMonth && invoiceDate.getFullYear() === year;

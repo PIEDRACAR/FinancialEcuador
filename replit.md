@@ -99,6 +99,7 @@ The application uses a relational database structure with the following entities
 ## Changelog
 ```
 Changelog:
+- June 30, 2025. Migration completed - Fixed API connection errors, unified ports to 5000, added CORS configuration, resolved date validation issues in dashboard
 - June 29, 2025. Initial setup
 ```
 

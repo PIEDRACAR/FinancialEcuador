@@ -47,6 +47,13 @@ export class MemStorage implements IStorage {
     this.currentCompanyId = 1;
     this.currentClientId = 1;
     this.currentInvoiceId = 1;
+    
+    // Add sample data for testing
+    this.initSampleData();
+  }
+
+  private initSampleData() {
+    // This will be populated when a company is created
   }
 
   // Users

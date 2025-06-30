@@ -245,7 +245,7 @@ export default function DashboardPage() {
                             Cliente #{invoice.clientId}
                           </p>
                           <p className="text-sm text-muted-foreground truncate">
-                            Factura #{invoice.number} - {format(new Date(invoice.date), 'dd MMM yyyy', { locale: es })}
+                            Factura #{invoice.number} - {invoice.date ? format(new Date(invoice.date), 'dd MMM yyyy', { locale: es }) : 'Fecha no disponible'}
                           </p>
                         </div>
                         <div className="flex items-center space-x-2">
