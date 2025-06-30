@@ -1,17 +1,14 @@
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { X } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { insertCompanySchema } from "@shared/schema";
 import { companiesApi } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 
 interface CreateCompanyModalProps {
   open: boolean;
@@ -62,6 +59,9 @@ export default function CreateCompanyModal({ open, onOpenChange }: CreateCompany
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Crear Nueva Empresa</DialogTitle>
+          <DialogDescription>
+            Agregue una nueva empresa a su cuenta para comenzar a gestionar su contabilidad
+          </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
@@ -101,7 +101,7 @@ export default function CreateCompanyModal({ open, onOpenChange }: CreateCompany
                 <FormItem>
                   <FormLabel>Dirección</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Dirección completa de la empresa" {...field} />
+                    <Input placeholder="Dirección de la empresa" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -113,6 +113,7 @@ export default function CreateCompanyModal({ open, onOpenChange }: CreateCompany
                 Cancelar
               </Button>
               <Button type="submit" disabled={createMutation.isPending}>
+                {createMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {createMutation.isPending ? "Creando..." : "Crear Empresa"}
               </Button>
             </div>

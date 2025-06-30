@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -6,11 +5,11 @@ import { insertClientSchema } from "@shared/schema";
 import { clientsApi } from "@/lib/api";
 import { useCompany } from "@/contexts/CompanyContext";
 import { useToast } from "@/hooks/use-toast";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Loader2 } from "lucide-react";
 
 interface CreateClientModalProps {
   open: boolean;
@@ -71,6 +70,9 @@ export default function CreateClientModal({ open, onOpenChange }: CreateClientMo
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>Agregar Nuevo Cliente</DialogTitle>
+          <DialogDescription>
+            Complete la información del cliente para agregarlo a su empresa
+          </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
@@ -142,7 +144,7 @@ export default function CreateClientModal({ open, onOpenChange }: CreateClientMo
                 <FormItem>
                   <FormLabel>Dirección</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Dirección completa del cliente" {...field} />
+                    <Input placeholder="Dirección del cliente" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -154,6 +156,7 @@ export default function CreateClientModal({ open, onOpenChange }: CreateClientMo
                 Cancelar
               </Button>
               <Button type="submit" disabled={createMutation.isPending}>
+                {createMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {createMutation.isPending ? "Agregando..." : "Agregar Cliente"}
               </Button>
             </div>

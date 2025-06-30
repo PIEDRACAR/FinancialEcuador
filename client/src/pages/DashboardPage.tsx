@@ -5,6 +5,8 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { DashboardSkeleton, CompanySelectionSkeleton } from "@/components/LoadingStates";
+import { NoCompaniesState } from "@/components/EmptyStates";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Building2, Users, FileText, DollarSign, TrendingUp, AlertCircle, Plus, UserPlus, RefreshCw } from "lucide-react";
 import { format } from "date-fns";
@@ -22,17 +24,8 @@ export default function DashboardPage() {
 
   if (companyLoading) {
     return (
-      <DashboardLayout title="Dashboard" subtitle="Cargando...">
-        <div className="space-y-6">
-          <Skeleton className="h-24 w-full" />
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Skeleton className="h-32" />
-            <Skeleton className="h-32" />
-            <Skeleton className="h-32" />
-            <Skeleton className="h-32" />
-          </div>
-          <Skeleton className="h-64" />
-        </div>
+      <DashboardLayout title="Dashboard" subtitle="Cargando información de la empresa...">
+        <DashboardSkeleton />
       </DashboardLayout>
     );
   }
@@ -40,20 +33,7 @@ export default function DashboardPage() {
   if (companies.length === 0) {
     return (
       <DashboardLayout title="Bienvenido" subtitle="Configura tu primera empresa">
-        <div className="text-center py-12 max-w-md mx-auto">
-          <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <Building2 className="w-12 h-12 text-gray-400" />
-          </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">¡Bienvenido a Sistema Contable Pro!</h3>
-          <p className="text-gray-600 mb-6">Para comenzar, necesitas crear tu primera empresa.</p>
-          <Button 
-            onClick={() => setShowCreateCompany(true)}
-            className="bg-primary-600 hover:bg-primary-700"
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            Crear Mi Primera Empresa
-          </Button>
-        </div>
+        <NoCompaniesState onCreateCompany={() => setShowCreateCompany(true)} />
         <CreateCompanyModal 
           open={showCreateCompany} 
           onOpenChange={setShowCreateCompany} 

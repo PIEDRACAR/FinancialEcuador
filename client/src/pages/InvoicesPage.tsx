@@ -24,26 +24,26 @@ export default function InvoicesPage() {
     enabled: !!selectedCompany,
   });
 
-  const filteredInvoices = invoices.filter(invoice => {
+  const filteredInvoices = invoices.filter((invoice: any) => {
     if (statusFilter === "all") return true;
     return invoice.status === statusFilter;
   });
 
   // Calculate stats
   const totalInvoices = invoices.length;
-  const totalAmount = invoices.reduce((sum, invoice) => sum + parseFloat(invoice.total), 0);
+  const totalAmount = invoices.reduce((sum: number, invoice: any) => sum + parseFloat(invoice.total || '0'), 0);
   const pendingAmount = invoices
-    .filter(inv => inv.status === "pending")
-    .reduce((sum, invoice) => sum + parseFloat(invoice.total), 0);
+    .filter((inv: any) => inv.status === "pendiente")
+    .reduce((sum: number, invoice: any) => sum + parseFloat(invoice.total || '0'), 0);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case "paid":
-        return <Badge className="bg-green-100 text-green-800">Pagada</Badge>;
-      case "pending":
-        return <Badge className="bg-yellow-100 text-yellow-800">Pendiente</Badge>;
-      case "overdue":
-        return <Badge className="bg-red-100 text-red-800">Vencida</Badge>;
+      case "pagada":
+        return <Badge className="bg-green-100 text-green-800 border-green-200">Pagada</Badge>;
+      case "pendiente":
+        return <Badge className="bg-yellow-100 text-yellow-800 border-yellow-200">Pendiente</Badge>;
+      case "vencida":
+        return <Badge className="bg-red-100 text-red-800 border-red-200">Vencida</Badge>;
       default:
         return <Badge variant="secondary">{status}</Badge>;
     }
@@ -175,7 +175,7 @@ export default function InvoicesPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredInvoices.map((invoice) => (
+                  {filteredInvoices.map((invoice: any) => (
                     <TableRow key={invoice.id}>
                       <TableCell>
                         <div className="text-sm font-medium text-gray-900">{invoice.number}</div>
