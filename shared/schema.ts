@@ -15,6 +15,8 @@ export const companies = pgTable("companies", {
   name: text("name").notNull(),
   ruc: text("ruc"),
   address: text("address"),
+  email: text("email"),
+  phone: text("phone"),
   ownerId: integer("owner_id").references(() => users.id).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
@@ -35,8 +37,13 @@ export const invoices = pgTable("invoices", {
   id: serial("id").primaryKey(),
   number: text("number").notNull(),
   date: timestamp("date").notNull(),
+  dueDate: timestamp("due_date"),
+  subtotal: decimal("subtotal", { precision: 10, scale: 2 }).notNull().default("0"),
+  iva: decimal("iva", { precision: 10, scale: 2 }).notNull().default("0"),
   total: decimal("total", { precision: 10, scale: 2 }).notNull(),
-  status: text("status").notNull(), // 'pending', 'paid', 'overdue'
+  status: text("status").notNull(), // 'pendiente', 'pagada', 'vencida'
+  items: text("items").default("[]"),
+  notes: text("notes").default(""),
   clientId: integer("client_id").references(() => clients.id).notNull(),
   companyId: integer("company_id").references(() => companies.id).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),

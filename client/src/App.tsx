@@ -13,6 +13,8 @@ import RegisterPage from "@/pages/RegisterPage";
 import DashboardPage from "@/pages/DashboardPage";
 import ClientsPage from "@/pages/ClientsPage";
 import InvoicesPage from "@/pages/InvoicesPage";
+import ReportsPage from "@/components/ReportsPage";
+import SettingsPage from "@/components/SettingsPage";
 import NotFound from "@/pages/not-found";
 
 // Wrapper component for all dashboard routes
@@ -46,6 +48,16 @@ function Router() {
       <Route path="/dashboard/invoices">
         <DashboardWrapper>
           <InvoicesPage />
+        </DashboardWrapper>
+      </Route>
+      <Route path="/dashboard/reports">
+        <DashboardWrapper>
+          <ReportsPage />
+        </DashboardWrapper>
+      </Route>
+      <Route path="/dashboard/settings">
+        <DashboardWrapper>
+          <SettingsPage />
         </DashboardWrapper>
       </Route>
       <Route path="/">

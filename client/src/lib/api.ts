@@ -122,7 +122,7 @@ export const invoicesApi = {
     return res.json();
   },
   
-  create: async (companyId: number, data: { number: string; date: Date; total: string; status: string; clientId: number }) => {
+  create: async (companyId: number, data: any) => {
     const res = await apiRequest("POST", `${API_BASE}/companies/${companyId}/invoices`, data);
     return res.json();
   },

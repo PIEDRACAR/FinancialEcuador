@@ -92,6 +92,8 @@ export class MemStorage implements IStorage {
       name: company.name,
       ruc: company.ruc || null,
       address: company.address || null,
+      email: company.email || null,
+      phone: company.phone || null,
       ownerId: company.ownerId,
       createdAt: new Date(),
     };
@@ -165,6 +167,11 @@ export class MemStorage implements IStorage {
     const newInvoice: Invoice = {
       ...invoice,
       id,
+      subtotal: invoice.subtotal || "0",
+      iva: invoice.iva || "0",
+      items: invoice.items || "[]",
+      notes: invoice.notes || "",
+      dueDate: invoice.dueDate || null,
       createdAt: new Date(),
     };
     this.invoices.set(id, newInvoice);

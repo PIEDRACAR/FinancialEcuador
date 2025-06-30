@@ -10,9 +10,15 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { NoInvoicesState } from "@/components/EmptyStates";
+import CreateInvoiceModal from "@/components/CreateInvoiceModal";
+import InvoiceDetailsModal from "@/components/InvoiceDetailsModal";
 
 export default function InvoicesPage() {
   const [statusFilter, setStatusFilter] = useState("all");
+  const [showCreateInvoice, setShowCreateInvoice] = useState(false);
+  const [selectedInvoice, setSelectedInvoice] = useState(null);
+  const [showInvoiceDetails, setShowInvoiceDetails] = useState(false);
   const { selectedCompany } = useCompany();
 
   const { data: invoices = [], isLoading } = useQuery({
@@ -73,7 +79,7 @@ export default function InvoicesPage() {
             <h2 className="text-2xl font-bold text-gray-900">Facturas</h2>
             <p className="text-gray-600">Administra tus facturas y documentos fiscales</p>
           </div>
-          <Button>
+          <Button onClick={() => setShowCreateInvoice(true)}>
             <Plus className="w-4 h-4 mr-2" />
             Nueva Factura
           </Button>
@@ -214,6 +220,17 @@ export default function InvoicesPage() {
           </CardContent>
         </Card>
       </div>
+
+      <CreateInvoiceModal 
+        open={showCreateInvoice} 
+        onOpenChange={setShowCreateInvoice} 
+      />
+
+      <InvoiceDetailsModal 
+        open={showInvoiceDetails} 
+        onOpenChange={setShowInvoiceDetails}
+        invoice={selectedInvoice}
+      />
     </DashboardLayout>
   );
 }
