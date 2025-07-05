@@ -69,6 +69,21 @@ function Router() {
           <ProformasPage />
         </DashboardWrapper>
       </Route>
+      <Route path="/dashboard/suppliers">
+        <DashboardWrapper>
+          <SuppliersPage />
+        </DashboardWrapper>
+      </Route>
+      <Route path="/dashboard/products">
+        <DashboardWrapper>
+          <ProductsPage />
+        </DashboardWrapper>
+      </Route>
+      <Route path="/dashboard/purchases">
+        <DashboardWrapper>
+          <PurchasesPage />
+        </DashboardWrapper>
+      </Route>
       <Route path="/dashboard/notes">
         <DashboardWrapper>
           <NotesPage />

@@ -648,7 +648,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       sum + parseFloat(purchase.total), 0
     );
     const totalRetentions = filteredPurchases.reduce((sum, purchase) => 
-      sum + parseFloat(purchase.retentionFuente) + parseFloat(purchase.retentionIva), 0
+      sum + parseFloat(purchase.retentionFuente || "0") + parseFloat(purchase.retentionIva || "0"), 0
     );
     
     res.json({
