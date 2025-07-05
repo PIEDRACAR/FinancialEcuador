@@ -1,7 +1,12 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { loginSchema, registerSchema, insertCompanySchema, insertClientSchema, insertInvoiceSchema } from "@shared/schema";
+import { 
+  loginSchema, registerSchema, insertCompanySchema, insertClientSchema, insertInvoiceSchema,
+  insertSupplierSchema, insertProductSchema, insertPurchaseSchema, insertRetentionSchema,
+  insertChartOfAccountSchema, insertJournalEntrySchema, insertJournalEntryDetailSchema,
+  insertEmployeeSchema, insertPayrollSchema, ECUADOR_TAX_RATES
+} from "@shared/schema";
 import { z } from "zod";
 
 interface AuthenticatedRequest extends Request {
@@ -297,6 +302,387 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.status(500).json({ message: "Error interno del servidor" });
       }
     }
+  });
+
+  // Supplier routes (Módulo de Proveedores)
+  app.get("/api/suppliers", requireAuth, async (req, res) => {
+    const companyId = parseInt(req.query.companyId as string);
+    if (!companyId) {
+      return res.status(400).json({ message: "Company ID es requerido" });
+    }
+    
+    const suppliers = await storage.getSuppliersByCompany(companyId);
+    res.json(suppliers);
+  });
+
+  app.post("/api/suppliers", requireAuth, async (req, res) => {
+    try {
+      const data = insertSupplierSchema.parse(req.body);
+      const supplier = await storage.createSupplier(data);
+      res.json(supplier);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ message: "Datos inválidos", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Error interno del servidor" });
+      }
+    }
+  });
+
+  app.put("/api/suppliers/:id", requireAuth, async (req, res) => {
+    try {
+      const data = insertSupplierSchema.partial().parse(req.body);
+      const supplier = await storage.updateSupplier(parseInt(req.params.id), data);
+      if (!supplier) {
+        return res.status(404).json({ message: "Proveedor no encontrado" });
+      }
+      res.json(supplier);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ message: "Datos inválidos", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Error interno del servidor" });
+      }
+    }
+  });
+
+  app.delete("/api/suppliers/:id", requireAuth, async (req, res) => {
+    const deleted = await storage.deleteSupplier(parseInt(req.params.id));
+    if (!deleted) {
+      return res.status(404).json({ message: "Proveedor no encontrado" });
+    }
+    res.json({ message: "Proveedor eliminado" });
+  });
+
+  // Product routes (Módulo de Productos)
+  app.get("/api/products", requireAuth, async (req, res) => {
+    const companyId = parseInt(req.query.companyId as string);
+    if (!companyId) {
+      return res.status(400).json({ message: "Company ID es requerido" });
+    }
+    
+    const products = await storage.getProductsByCompany(companyId);
+    res.json(products);
+  });
+
+  app.post("/api/products", requireAuth, async (req, res) => {
+    try {
+      const data = insertProductSchema.parse(req.body);
+      const product = await storage.createProduct(data);
+      res.json(product);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ message: "Datos inválidos", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Error interno del servidor" });
+      }
+    }
+  });
+
+  app.put("/api/products/:id", requireAuth, async (req, res) => {
+    try {
+      const data = insertProductSchema.partial().parse(req.body);
+      const product = await storage.updateProduct(parseInt(req.params.id), data);
+      if (!product) {
+        return res.status(404).json({ message: "Producto no encontrado" });
+      }
+      res.json(product);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ message: "Datos inválidos", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Error interno del servidor" });
+      }
+    }
+  });
+
+  app.delete("/api/products/:id", requireAuth, async (req, res) => {
+    const deleted = await storage.deleteProduct(parseInt(req.params.id));
+    if (!deleted) {
+      return res.status(404).json({ message: "Producto no encontrado" });
+    }
+    res.json({ message: "Producto eliminado" });
+  });
+
+  // Purchase routes (Módulo de Compras)
+  app.get("/api/purchases", requireAuth, async (req, res) => {
+    const companyId = parseInt(req.query.companyId as string);
+    if (!companyId) {
+      return res.status(400).json({ message: "Company ID es requerido" });
+    }
+    
+    const purchases = await storage.getPurchasesByCompany(companyId);
+    res.json(purchases);
+  });
+
+  app.post("/api/purchases", requireAuth, async (req, res) => {
+    try {
+      const data = insertPurchaseSchema.parse(req.body);
+      const purchase = await storage.createPurchase(data);
+      res.json(purchase);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ message: "Datos inválidos", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Error interno del servidor" });
+      }
+    }
+  });
+
+  app.put("/api/purchases/:id", requireAuth, async (req, res) => {
+    try {
+      const data = insertPurchaseSchema.partial().parse(req.body);
+      const purchase = await storage.updatePurchase(parseInt(req.params.id), data);
+      if (!purchase) {
+        return res.status(404).json({ message: "Compra no encontrada" });
+      }
+      res.json(purchase);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ message: "Datos inválidos", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Error interno del servidor" });
+      }
+    }
+  });
+
+  app.delete("/api/purchases/:id", requireAuth, async (req, res) => {
+    const deleted = await storage.deletePurchase(parseInt(req.params.id));
+    if (!deleted) {
+      return res.status(404).json({ message: "Compra no encontrada" });
+    }
+    res.json({ message: "Compra eliminada" });
+  });
+
+  // Retention routes (Módulo de Retenciones)
+  app.get("/api/retentions", requireAuth, async (req, res) => {
+    const companyId = parseInt(req.query.companyId as string);
+    if (!companyId) {
+      return res.status(400).json({ message: "Company ID es requerido" });
+    }
+    
+    const retentions = await storage.getRetentionsByCompany(companyId);
+    res.json(retentions);
+  });
+
+  app.post("/api/retentions", requireAuth, async (req, res) => {
+    try {
+      const data = insertRetentionSchema.parse(req.body);
+      const retention = await storage.createRetention(data);
+      res.json(retention);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ message: "Datos inválidos", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Error interno del servidor" });
+      }
+    }
+  });
+
+  // Rutas especiales para cálculo automático de retenciones Ecuador
+  app.post("/api/retentions/calculate", requireAuth, async (req, res) => {
+    try {
+      const { baseAmount, type, concept } = req.body;
+      
+      let percentage = 0;
+      if (type === "fuente") {
+        switch (concept) {
+          case "bienes":
+            percentage = ECUADOR_TAX_RATES.RETENCIONES.FUENTE.BIENES;
+            break;
+          case "servicios":
+            percentage = ECUADOR_TAX_RATES.RETENCIONES.FUENTE.SERVICIOS;
+            break;
+          case "arrendamientos":
+            percentage = ECUADOR_TAX_RATES.RETENCIONES.FUENTE.ARRENDAMIENTOS;
+            break;
+          case "honorarios":
+            percentage = ECUADOR_TAX_RATES.RETENCIONES.FUENTE.HONORARIOS;
+            break;
+        }
+      } else if (type === "iva") {
+        percentage = concept === "bienes" 
+          ? ECUADOR_TAX_RATES.RETENCIONES.IVA.BIENES 
+          : ECUADOR_TAX_RATES.RETENCIONES.IVA.SERVICIOS;
+      }
+      
+      const retentionAmount = (parseFloat(baseAmount) * percentage) / 100;
+      
+      res.json({
+        percentage,
+        retentionAmount: retentionAmount.toFixed(2)
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Error calculando retención" });
+    }
+  });
+
+  // SRI Integration routes (Módulo SRI)
+  app.get("/api/sri/connection", requireAuth, async (req, res) => {
+    // Simulación de conexión SRI
+    res.json({
+      status: "connected",
+      lastSync: new Date().toISOString(),
+      environment: "test" // test o production
+    });
+  });
+
+  app.get("/api/sri/exportable-data", requireAuth, async (req, res) => {
+    const companyId = parseInt(req.query.companyId as string);
+    if (!companyId) {
+      return res.status(400).json({ message: "Company ID es requerido" });
+    }
+    
+    const invoices = await storage.getInvoicesByCompany(companyId);
+    const purchases = await storage.getPurchasesByCompany(companyId);
+    const retentions = await storage.getRetentionsByCompany(companyId);
+    
+    res.json({
+      facturas: invoices.length,
+      compras: purchases.length,
+      retenciones: retentions.length,
+      lastExport: new Date().toISOString()
+    });
+  });
+
+  app.post("/api/sri/export", requireAuth, async (req, res) => {
+    try {
+      const { format, type, companyId } = req.body;
+      
+      // Simulación de exportación a SRI
+      res.json({
+        success: true,
+        message: `Datos exportados exitosamente en formato ${format}`,
+        filename: `sri_export_${type}_${new Date().getTime()}.${format.toLowerCase()}`,
+        exportDate: new Date().toISOString()
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Error en exportación SRI" });
+    }
+  });
+
+  app.get("/api/sri/import-history", requireAuth, async (req, res) => {
+    // Simulación de historial de importaciones
+    res.json([
+      {
+        id: 1,
+        date: new Date().toISOString(),
+        type: "facturas",
+        status: "completed",
+        records: 15
+      },
+      {
+        id: 2,
+        date: new Date(Date.now() - 86400000).toISOString(),
+        type: "compras",
+        status: "completed", 
+        records: 8
+      }
+    ]);
+  });
+
+  // Tax rates endpoint (Tasas Impositivas Ecuador)
+  app.get("/api/tax-rates", requireAuth, async (req, res) => {
+    res.json(ECUADOR_TAX_RATES);
+  });
+
+  // Report generation routes (Módulo de Reportes)
+  app.get("/api/reports/sales", requireAuth, async (req, res) => {
+    const companyId = parseInt(req.query.companyId as string);
+    const { startDate, endDate } = req.query;
+    
+    if (!companyId) {
+      return res.status(400).json({ message: "Company ID es requerido" });
+    }
+    
+    const invoices = await storage.getInvoicesByCompany(companyId);
+    
+    // Filtrar por fechas si se proporcionan
+    let filteredInvoices = invoices;
+    if (startDate && endDate) {
+      const start = new Date(startDate as string);
+      const end = new Date(endDate as string);
+      filteredInvoices = invoices.filter(invoice => 
+        new Date(invoice.date) >= start && new Date(invoice.date) <= end
+      );
+    }
+    
+    const totalSales = filteredInvoices.reduce((sum, invoice) => 
+      sum + parseFloat(invoice.total), 0
+    );
+    const totalIva = filteredInvoices.reduce((sum, invoice) => 
+      sum + parseFloat(invoice.iva), 0
+    );
+    
+    res.json({
+      period: { startDate, endDate },
+      totalInvoices: filteredInvoices.length,
+      totalSales: totalSales.toFixed(2),
+      totalIva: totalIva.toFixed(2),
+      averageTicket: (totalSales / filteredInvoices.length || 0).toFixed(2),
+      invoices: filteredInvoices
+    });
+  });
+
+  app.get("/api/reports/purchases", requireAuth, async (req, res) => {
+    const companyId = parseInt(req.query.companyId as string);
+    const { startDate, endDate } = req.query;
+    
+    if (!companyId) {
+      return res.status(400).json({ message: "Company ID es requerido" });
+    }
+    
+    const purchases = await storage.getPurchasesByCompany(companyId);
+    
+    // Filtrar por fechas si se proporcionan
+    let filteredPurchases = purchases;
+    if (startDate && endDate) {
+      const start = new Date(startDate as string);
+      const end = new Date(endDate as string);
+      filteredPurchases = purchases.filter(purchase => 
+        new Date(purchase.date) >= start && new Date(purchase.date) <= end
+      );
+    }
+    
+    const totalPurchases = filteredPurchases.reduce((sum, purchase) => 
+      sum + parseFloat(purchase.total), 0
+    );
+    const totalRetentions = filteredPurchases.reduce((sum, purchase) => 
+      sum + parseFloat(purchase.retentionFuente) + parseFloat(purchase.retentionIva), 0
+    );
+    
+    res.json({
+      period: { startDate, endDate },
+      totalPurchases: filteredPurchases.length,
+      totalAmount: totalPurchases.toFixed(2),
+      totalRetentions: totalRetentions.toFixed(2),
+      purchases: filteredPurchases
+    });
+  });
+
+  app.get("/api/reports/balance", requireAuth, async (req, res) => {
+    const companyId = parseInt(req.query.companyId as string);
+    if (!companyId) {
+      return res.status(400).json({ message: "Company ID es requerido" });
+    }
+    
+    const accounts = await storage.getChartOfAccountsByCompany(companyId);
+    const journalEntries = await storage.getJournalEntriesByCompany(companyId);
+    
+    // Calcular balance por tipo de cuenta
+    const balanceSheet = {
+      activos: accounts.filter(acc => acc.type === "activo"),
+      pasivos: accounts.filter(acc => acc.type === "pasivo"),
+      patrimonio: accounts.filter(acc => acc.type === "patrimonio"),
+      ingresos: accounts.filter(acc => acc.type === "ingreso"),
+      gastos: accounts.filter(acc => acc.type === "gasto")
+    };
+    
+    res.json({
+      date: new Date().toISOString(),
+      balanceSheet,
+      totalEntries: journalEntries.length
+    });
   });
 
   const httpServer = createServer(app);

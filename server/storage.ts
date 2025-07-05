@@ -1,9 +1,11 @@
 import { 
-  users, companies, clients, invoices, retentions, chartOfAccounts, journalEntries, journalEntryDetails, employees, payrolls, systemSettings,
-  type User, type InsertUser, type Company, type InsertCompany, type Client, type InsertClient, type Invoice, type InsertInvoice,
+  users, companies, clients, suppliers, products, invoices, purchases, retentions, chartOfAccounts, journalEntries, journalEntryDetails, employees, payrolls, systemSettings,
+  type User, type InsertUser, type Company, type InsertCompany, type Client, type InsertClient, type Supplier, type InsertSupplier,
+  type Product, type InsertProduct, type Invoice, type InsertInvoice, type Purchase, type InsertPurchase,
   type Retention, type InsertRetention, type ChartOfAccount, type InsertChartOfAccount, 
   type JournalEntry, type InsertJournalEntry, type JournalEntryDetail, type InsertJournalEntryDetail,
-  type Employee, type InsertEmployee, type Payroll, type InsertPayroll, type SystemSetting, type InsertSystemSetting
+  type Employee, type InsertEmployee, type Payroll, type InsertPayroll, type SystemSetting, type InsertSystemSetting,
+  ECUADOR_TAX_RATES
 } from "@shared/schema";
 
 export interface IStorage {
@@ -26,12 +28,33 @@ export interface IStorage {
   updateClient(id: number, updates: Partial<InsertClient>): Promise<Client | undefined>;
   deleteClient(id: number): Promise<boolean>;
   
+  // Suppliers
+  getSupplier(id: number): Promise<Supplier | undefined>;
+  getSuppliersByCompany(companyId: number): Promise<Supplier[]>;
+  createSupplier(supplier: InsertSupplier): Promise<Supplier>;
+  updateSupplier(id: number, updates: Partial<InsertSupplier>): Promise<Supplier | undefined>;
+  deleteSupplier(id: number): Promise<boolean>;
+  
+  // Products
+  getProduct(id: number): Promise<Product | undefined>;
+  getProductsByCompany(companyId: number): Promise<Product[]>;
+  createProduct(product: InsertProduct): Promise<Product>;
+  updateProduct(id: number, updates: Partial<InsertProduct>): Promise<Product | undefined>;
+  deleteProduct(id: number): Promise<boolean>;
+  
   // Invoices
   getInvoice(id: number): Promise<Invoice | undefined>;
   getInvoicesByCompany(companyId: number): Promise<Invoice[]>;
   createInvoice(invoice: InsertInvoice): Promise<Invoice>;
   updateInvoice(id: number, updates: Partial<InsertInvoice>): Promise<Invoice | undefined>;
   deleteInvoice(id: number): Promise<boolean>;
+  
+  // Purchases
+  getPurchase(id: number): Promise<Purchase | undefined>;
+  getPurchasesByCompany(companyId: number): Promise<Purchase[]>;
+  createPurchase(purchase: InsertPurchase): Promise<Purchase>;
+  updatePurchase(id: number, updates: Partial<InsertPurchase>): Promise<Purchase | undefined>;
+  deletePurchase(id: number): Promise<boolean>;
   
   // Retentions
   getRetention(id: number): Promise<Retention | undefined>;
@@ -86,7 +109,10 @@ export class MemStorage implements IStorage {
   private users: Map<number, User>;
   private companies: Map<number, Company>;
   private clients: Map<number, Client>;
+  private suppliers: Map<number, Supplier>;
+  private products: Map<number, Product>;
   private invoices: Map<number, Invoice>;
+  private purchases: Map<number, Purchase>;
   private retentions: Map<number, Retention>;
   private chartOfAccounts: Map<number, ChartOfAccount>;
   private journalEntries: Map<number, JournalEntry>;
@@ -94,10 +120,14 @@ export class MemStorage implements IStorage {
   private employees: Map<number, Employee>;
   private payrolls: Map<number, Payroll>;
   private systemSettings: Map<number, SystemSetting>;
+  
   private currentUserId: number;
   private currentCompanyId: number;
   private currentClientId: number;
+  private currentSupplierId: number;
+  private currentProductId: number;
   private currentInvoiceId: number;
+  private currentPurchaseId: number;
   private currentRetentionId: number;
   private currentChartOfAccountId: number;
   private currentJournalEntryId: number;
@@ -110,7 +140,10 @@ export class MemStorage implements IStorage {
     this.users = new Map();
     this.companies = new Map();
     this.clients = new Map();
+    this.suppliers = new Map();
+    this.products = new Map();
     this.invoices = new Map();
+    this.purchases = new Map();
     this.retentions = new Map();
     this.chartOfAccounts = new Map();
     this.journalEntries = new Map();
@@ -118,10 +151,14 @@ export class MemStorage implements IStorage {
     this.employees = new Map();
     this.payrolls = new Map();
     this.systemSettings = new Map();
+    
     this.currentUserId = 1;
     this.currentCompanyId = 1;
     this.currentClientId = 1;
+    this.currentSupplierId = 1;
+    this.currentProductId = 1;
     this.currentInvoiceId = 1;
+    this.currentPurchaseId = 1;
     this.currentRetentionId = 1;
     this.currentChartOfAccountId = 1;
     this.currentJournalEntryId = 1;
@@ -130,15 +167,142 @@ export class MemStorage implements IStorage {
     this.currentPayrollId = 1;
     this.currentSystemSettingId = 1;
     
-    // Add sample data for testing
     this.initSampleData();
   }
 
   private initSampleData() {
-    // This will be populated when a company is created
+    // Datos de ejemplo para Ecuador con nuevas normativas
+    this.createUser({
+      name: "Carlos Herrera",
+      email: "carlos@empresa.com",
+      password: "password123"
+    });
+
+    // Plan de cuentas estándar Ecuador
+    const defaultChartOfAccounts = [
+      // ACTIVOS
+      { code: "1", name: "ACTIVOS", type: "activo", level: 1 },
+      { code: "1.01", name: "ACTIVOS CORRIENTES", type: "activo", level: 2 },
+      { code: "1.01.01", name: "EFECTIVO Y EQUIVALENTES", type: "activo", level: 3 },
+      { code: "1.01.01.001", name: "Caja General", type: "activo", level: 4 },
+      { code: "1.01.01.002", name: "Banco Pichincha", type: "activo", level: 4 },
+      { code: "1.01.02", name: "CUENTAS POR COBRAR", type: "activo", level: 3 },
+      { code: "1.01.02.001", name: "Clientes", type: "activo", level: 4 },
+      { code: "1.01.03", name: "INVENTARIOS", type: "activo", level: 3 },
+      { code: "1.01.03.001", name: "Mercaderías", type: "activo", level: 4 },
+      { code: "1.01.04", name: "IMPUESTOS POR COBRAR", type: "activo", level: 3 },
+      { code: "1.01.04.001", name: "IVA Pagado", type: "activo", level: 4 },
+      { code: "1.01.04.002", name: "Retención Fuente por Cobrar", type: "activo", level: 4 },
+      
+      // PASIVOS
+      { code: "2", name: "PASIVOS", type: "pasivo", level: 1 },
+      { code: "2.01", name: "PASIVOS CORRIENTES", type: "pasivo", level: 2 },
+      { code: "2.01.01", name: "CUENTAS POR PAGAR", type: "pasivo", level: 3 },
+      { code: "2.01.01.001", name: "Proveedores", type: "pasivo", level: 4 },
+      { code: "2.01.02", name: "IMPUESTOS POR PAGAR", type: "pasivo", level: 3 },
+      { code: "2.01.02.001", name: "IVA por Pagar", type: "pasivo", level: 4 },
+      { code: "2.01.02.002", name: "Retención Fuente por Pagar", type: "pasivo", level: 4 },
+      { code: "2.01.02.003", name: "Retención IVA por Pagar", type: "pasivo", level: 4 },
+      { code: "2.01.02.004", name: "IESS por Pagar", type: "pasivo", level: 4 },
+      
+      // PATRIMONIO
+      { code: "3", name: "PATRIMONIO", type: "patrimonio", level: 1 },
+      { code: "3.01", name: "CAPITAL SOCIAL", type: "patrimonio", level: 2 },
+      { code: "3.01.01", name: "Capital Suscrito y Pagado", type: "patrimonio", level: 3 },
+      { code: "3.02", name: "UTILIDADES RETENIDAS", type: "patrimonio", level: 2 },
+      
+      // INGRESOS
+      { code: "4", name: "INGRESOS", type: "ingreso", level: 1 },
+      { code: "4.01", name: "INGRESOS OPERACIONALES", type: "ingreso", level: 2 },
+      { code: "4.01.01", name: "Ventas", type: "ingreso", level: 3 },
+      { code: "4.01.01.001", name: "Ventas Gravadas 15%", type: "ingreso", level: 4 },
+      { code: "4.01.01.002", name: "Ventas Gravadas 5%", type: "ingreso", level: 4 },
+      { code: "4.01.01.003", name: "Ventas 0%", type: "ingreso", level: 4 },
+      
+      // GASTOS
+      { code: "5", name: "GASTOS", type: "gasto", level: 1 },
+      { code: "5.01", name: "GASTOS OPERACIONALES", type: "gasto", level: 2 },
+      { code: "5.01.01", name: "Compras", type: "gasto", level: 3 },
+      { code: "5.01.02", name: "Gastos de Personal", type: "gasto", level: 3 },
+      { code: "5.01.02.001", name: "Sueldos y Salarios", type: "gasto", level: 4 },
+      { code: "5.01.02.002", name: "Aporte Patronal IESS", type: "gasto", level: 4 },
+      { code: "5.01.03", name: "Gastos Generales", type: "gasto", level: 3 },
+      { code: "5.01.03.001", name: "Servicios Básicos", type: "gasto", level: 4 },
+      { code: "5.01.03.002", name: "Arriendos", type: "gasto", level: 4 }
+    ];
+
+    // Inicializar con empresa ejemplo
+    this.createCompany({
+      name: "HERRERA PIEDRA CARLOS RUBEN",
+      ruc: "0704567890001",
+      address: "Av. Principal 123, Guayaquil",
+      email: "info@empresa.com",
+      phone: "042-234567",
+      ownerId: 1
+    }).then(company => {
+      // Crear plan de cuentas
+      defaultChartOfAccounts.forEach(account => {
+        this.createChartOfAccount({
+          ...account,
+          companyId: company.id
+        });
+      });
+
+      // Crear productos de ejemplo
+      this.createProduct({
+        code: "PROD001",
+        name: "Producto de Ejemplo",
+        description: "Producto para pruebas",
+        category: "General",
+        unit: "unidad",
+        purchasePrice: "10.00",
+        salePrice: "15.00",
+        ivaRate: "15.00",
+        stock: 100,
+        minStock: 10,
+        companyId: company.id
+      });
+
+      // Crear proveedor de ejemplo
+      this.createSupplier({
+        name: "Proveedor Ejemplo S.A.",
+        ruc: "0912345678001",
+        email: "proveedor@ejemplo.com",
+        phone: "042-123456",
+        address: "Av. Comercial 456, Guayaquil",
+        contactPerson: "Juan Pérez",
+        category: "bienes",
+        paymentTerms: "30 días",
+        companyId: company.id
+      });
+
+      // Crear cliente de ejemplo
+      this.createClient({
+        name: "Cliente Ejemplo",
+        ruc: "0987654321001",
+        email: "cliente@ejemplo.com", 
+        phone: "042-987654",
+        address: "Calle Principal 789, Guayaquil",
+        companyId: company.id
+      });
+
+      // Crear empleado de ejemplo
+      this.createEmployee({
+        firstName: "María",
+        lastName: "González",
+        cedula: "0923456789",
+        email: "maria.gonzalez@empresa.com",
+        phone: "099-123456",
+        position: "Contadora",
+        department: "Contabilidad",
+        salary: "800.00",
+        startDate: new Date("2024-01-01"),
+        companyId: company.id
+      });
+    });
   }
 
-  // Users
+  // USERS
   async getUser(id: number): Promise<User | undefined> {
     return this.users.get(id);
   }
@@ -150,15 +314,17 @@ export class MemStorage implements IStorage {
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = this.currentUserId++;
     const user: User = {
-      ...insertUser,
       id,
+      name: insertUser.name,
+      email: insertUser.email,
+      password: insertUser.password,
       createdAt: new Date(),
     };
     this.users.set(id, user);
     return user;
   }
 
-  // Companies
+  // COMPANIES
   async getCompany(id: number): Promise<Company | undefined> {
     return this.companies.get(id);
   }
@@ -196,7 +362,7 @@ export class MemStorage implements IStorage {
     return this.companies.delete(id);
   }
 
-  // Clients
+  // CLIENTS
   async getClient(id: number): Promise<Client | undefined> {
     return this.clients.get(id);
   }
@@ -215,7 +381,7 @@ export class MemStorage implements IStorage {
       phone: client.phone || null,
       address: client.address || null,
       companyId: client.companyId,
-      isActive: client.isActive ?? true,
+      isActive: client.isActive !== undefined ? client.isActive : true,
       createdAt: new Date(),
     };
     this.clients.set(id, newClient);
@@ -235,7 +401,93 @@ export class MemStorage implements IStorage {
     return this.clients.delete(id);
   }
 
-  // Invoices
+  // SUPPLIERS
+  async getSupplier(id: number): Promise<Supplier | undefined> {
+    return this.suppliers.get(id);
+  }
+
+  async getSuppliersByCompany(companyId: number): Promise<Supplier[]> {
+    return Array.from(this.suppliers.values()).filter(supplier => supplier.companyId === companyId);
+  }
+
+  async createSupplier(supplier: InsertSupplier): Promise<Supplier> {
+    const id = this.currentSupplierId++;
+    const newSupplier: Supplier = {
+      id,
+      name: supplier.name,
+      ruc: supplier.ruc,
+      email: supplier.email || null,
+      phone: supplier.phone || null,
+      address: supplier.address || null,
+      contactPerson: supplier.contactPerson || null,
+      category: supplier.category || null,
+      paymentTerms: supplier.paymentTerms || "contado",
+      isActive: supplier.isActive !== undefined ? supplier.isActive : true,
+      companyId: supplier.companyId,
+      createdAt: new Date(),
+    };
+    this.suppliers.set(id, newSupplier);
+    return newSupplier;
+  }
+
+  async updateSupplier(id: number, updates: Partial<InsertSupplier>): Promise<Supplier | undefined> {
+    const supplier = this.suppliers.get(id);
+    if (!supplier) return undefined;
+    
+    const updatedSupplier = { ...supplier, ...updates };
+    this.suppliers.set(id, updatedSupplier);
+    return updatedSupplier;
+  }
+
+  async deleteSupplier(id: number): Promise<boolean> {
+    return this.suppliers.delete(id);
+  }
+
+  // PRODUCTS
+  async getProduct(id: number): Promise<Product | undefined> {
+    return this.products.get(id);
+  }
+
+  async getProductsByCompany(companyId: number): Promise<Product[]> {
+    return Array.from(this.products.values()).filter(product => product.companyId === companyId);
+  }
+
+  async createProduct(product: InsertProduct): Promise<Product> {
+    const id = this.currentProductId++;
+    const newProduct: Product = {
+      id,
+      code: product.code,
+      name: product.name,
+      description: product.description || null,
+      category: product.category || null,
+      unit: product.unit || "unidad",
+      purchasePrice: product.purchasePrice || "0.00",
+      salePrice: product.salePrice || "0.00",
+      ivaRate: product.ivaRate || "15.00",
+      stock: product.stock || 0,
+      minStock: product.minStock || 0,
+      isActive: product.isActive !== undefined ? product.isActive : true,
+      companyId: product.companyId,
+      createdAt: new Date(),
+    };
+    this.products.set(id, newProduct);
+    return newProduct;
+  }
+
+  async updateProduct(id: number, updates: Partial<InsertProduct>): Promise<Product | undefined> {
+    const product = this.products.get(id);
+    if (!product) return undefined;
+    
+    const updatedProduct = { ...product, ...updates };
+    this.products.set(id, updatedProduct);
+    return updatedProduct;
+  }
+
+  async deleteProduct(id: number): Promise<boolean> {
+    return this.products.delete(id);
+  }
+
+  // INVOICES
   async getInvoice(id: number): Promise<Invoice | undefined> {
     return this.invoices.get(id);
   }
@@ -247,15 +499,24 @@ export class MemStorage implements IStorage {
   async createInvoice(invoice: InsertInvoice): Promise<Invoice> {
     const id = this.currentInvoiceId++;
     const newInvoice: Invoice = {
-      ...invoice,
       id,
-      subtotal: invoice.subtotal || "0",
-      iva: invoice.iva || "0",
+      number: invoice.number,
+      date: invoice.date,
+      subtotal: invoice.subtotal || "0.00",
+      iva: invoice.iva || "0.00",
       ivaRate: invoice.ivaRate || "15.00",
+      ice: invoice.ice || "0.00",
+      total: invoice.total,
+      status: invoice.status,
       type: invoice.type || "factura",
+      paymentMethod: invoice.paymentMethod || "efectivo",
+      authorizationCode: invoice.authorizationCode || null,
+      accessKey: invoice.accessKey || null,
+      xmlSigned: invoice.xmlSigned || null,
       items: invoice.items || "[]",
       notes: invoice.notes || "",
-      dueDate: invoice.dueDate || null,
+      clientId: invoice.clientId,
+      companyId: invoice.companyId,
       createdAt: new Date(),
     };
     this.invoices.set(id, newInvoice);
@@ -275,7 +536,58 @@ export class MemStorage implements IStorage {
     return this.invoices.delete(id);
   }
 
-  // Retentions
+  // PURCHASES
+  async getPurchase(id: number): Promise<Purchase | undefined> {
+    return this.purchases.get(id);
+  }
+
+  async getPurchasesByCompany(companyId: number): Promise<Purchase[]> {
+    return Array.from(this.purchases.values()).filter(purchase => purchase.companyId === companyId);
+  }
+
+  async createPurchase(purchase: InsertPurchase): Promise<Purchase> {
+    const id = this.currentPurchaseId++;
+    const newPurchase: Purchase = {
+      id,
+      number: purchase.number,
+      date: purchase.date,
+      subtotal: purchase.subtotal || "0.00",
+      iva: purchase.iva || "0.00",
+      ivaRate: purchase.ivaRate || "15.00",
+      ice: purchase.ice || "0.00",
+      retentionFuente: purchase.retentionFuente || "0.00",
+      retentionIva: purchase.retentionIva || "0.00",
+      total: purchase.total,
+      status: purchase.status || "pendiente",
+      type: purchase.type || "compra",
+      paymentMethod: purchase.paymentMethod || "efectivo",
+      authorizationCode: purchase.authorizationCode || null,
+      accessKey: purchase.accessKey || null,
+      xmlSigned: purchase.xmlSigned || null,
+      items: purchase.items || "[]",
+      notes: purchase.notes || "",
+      supplierId: purchase.supplierId,
+      companyId: purchase.companyId,
+      createdAt: new Date(),
+    };
+    this.purchases.set(id, newPurchase);
+    return newPurchase;
+  }
+
+  async updatePurchase(id: number, updates: Partial<InsertPurchase>): Promise<Purchase | undefined> {
+    const purchase = this.purchases.get(id);
+    if (!purchase) return undefined;
+    
+    const updatedPurchase = { ...purchase, ...updates };
+    this.purchases.set(id, updatedPurchase);
+    return updatedPurchase;
+  }
+
+  async deletePurchase(id: number): Promise<boolean> {
+    return this.purchases.delete(id);
+  }
+
+  // RETENTIONS
   async getRetention(id: number): Promise<Retention | undefined> {
     return this.retentions.get(id);
   }
@@ -287,10 +599,23 @@ export class MemStorage implements IStorage {
   async createRetention(retention: InsertRetention): Promise<Retention> {
     const id = this.currentRetentionId++;
     const newRetention: Retention = {
-      ...retention,
       id,
-      createdAt: new Date(),
+      number: retention.number,
+      date: retention.date,
+      type: retention.type,
+      concept: retention.concept,
+      percentage: retention.percentage,
+      baseAmount: retention.baseAmount,
+      retentionAmount: retention.retentionAmount,
+      authorizationCode: retention.authorizationCode || null,
+      accessKey: retention.accessKey || null,
+      xmlSigned: retention.xmlSigned || null,
       invoiceId: retention.invoiceId || null,
+      purchaseId: retention.purchaseId || null,
+      clientId: retention.clientId || null,
+      supplierId: retention.supplierId || null,
+      companyId: retention.companyId,
+      createdAt: new Date(),
     };
     this.retentions.set(id, newRetention);
     return newRetention;
@@ -309,7 +634,7 @@ export class MemStorage implements IStorage {
     return this.retentions.delete(id);
   }
 
-  // Chart of Accounts
+  // CHART OF ACCOUNTS
   async getChartOfAccount(id: number): Promise<ChartOfAccount | undefined> {
     return this.chartOfAccounts.get(id);
   }
@@ -321,12 +646,15 @@ export class MemStorage implements IStorage {
   async createChartOfAccount(account: InsertChartOfAccount): Promise<ChartOfAccount> {
     const id = this.currentChartOfAccountId++;
     const newAccount: ChartOfAccount = {
-      ...account,
       id,
+      code: account.code,
+      name: account.name,
+      type: account.type,
+      parentId: account.parentId || null,
+      level: account.level || 1,
+      isActive: account.isActive !== undefined ? account.isActive : true,
+      companyId: account.companyId,
       createdAt: new Date(),
-      isActive: account.isActive ?? true,
-      parentId: account.parentId ?? null,
-      level: account.level ?? 1,
     };
     this.chartOfAccounts.set(id, newAccount);
     return newAccount;
@@ -345,7 +673,7 @@ export class MemStorage implements IStorage {
     return this.chartOfAccounts.delete(id);
   }
 
-  // Journal Entries
+  // JOURNAL ENTRIES
   async getJournalEntry(id: number): Promise<JournalEntry | undefined> {
     return this.journalEntries.get(id);
   }
@@ -357,11 +685,14 @@ export class MemStorage implements IStorage {
   async createJournalEntry(entry: InsertJournalEntry): Promise<JournalEntry> {
     const id = this.currentJournalEntryId++;
     const newEntry: JournalEntry = {
-      ...entry,
       id,
-      createdAt: new Date(),
-      type: entry.type || "general",
+      number: entry.number,
+      date: entry.date,
+      description: entry.description,
       reference: entry.reference || null,
+      type: entry.type || "manual",
+      companyId: entry.companyId,
+      createdAt: new Date(),
     };
     this.journalEntries.set(id, newEntry);
     return newEntry;
@@ -380,7 +711,7 @@ export class MemStorage implements IStorage {
     return this.journalEntries.delete(id);
   }
 
-  // Journal Entry Details
+  // JOURNAL ENTRY DETAILS
   async getJournalEntryDetails(journalEntryId: number): Promise<JournalEntryDetail[]> {
     return Array.from(this.journalEntryDetails.values()).filter(detail => detail.journalEntryId === journalEntryId);
   }
@@ -388,11 +719,12 @@ export class MemStorage implements IStorage {
   async createJournalEntryDetail(detail: InsertJournalEntryDetail): Promise<JournalEntryDetail> {
     const id = this.currentJournalEntryDetailId++;
     const newDetail: JournalEntryDetail = {
-      ...detail,
       id,
+      journalEntryId: detail.journalEntryId,
+      accountId: detail.accountId,
+      debit: detail.debit || "0.00",
+      credit: detail.credit || "0.00",
       description: detail.description || null,
-      debit: detail.debit || null,
-      credit: detail.credit || null,
     };
     this.journalEntryDetails.set(id, newDetail);
     return newDetail;
@@ -411,7 +743,7 @@ export class MemStorage implements IStorage {
     return this.journalEntryDetails.delete(id);
   }
 
-  // Employees
+  // EMPLOYEES
   async getEmployee(id: number): Promise<Employee | undefined> {
     return this.employees.get(id);
   }
@@ -423,14 +755,20 @@ export class MemStorage implements IStorage {
   async createEmployee(employee: InsertEmployee): Promise<Employee> {
     const id = this.currentEmployeeId++;
     const newEmployee: Employee = {
-      ...employee,
       id,
-      createdAt: new Date(),
+      firstName: employee.firstName,
+      lastName: employee.lastName,
+      cedula: employee.cedula,
       email: employee.email || null,
       phone: employee.phone || null,
+      position: employee.position,
       department: employee.department || null,
-      isActive: employee.isActive ?? true,
+      salary: employee.salary,
+      startDate: employee.startDate,
       endDate: employee.endDate || null,
+      isActive: employee.isActive !== undefined ? employee.isActive : true,
+      companyId: employee.companyId,
+      createdAt: new Date(),
     };
     this.employees.set(id, newEmployee);
     return newEmployee;
@@ -449,7 +787,7 @@ export class MemStorage implements IStorage {
     return this.employees.delete(id);
   }
 
-  // Payrolls
+  // PAYROLLS
   async getPayroll(id: number): Promise<Payroll | undefined> {
     return this.payrolls.get(id);
   }
@@ -465,13 +803,20 @@ export class MemStorage implements IStorage {
   async createPayroll(payroll: InsertPayroll): Promise<Payroll> {
     const id = this.currentPayrollId++;
     const newPayroll: Payroll = {
-      ...payroll,
       id,
-      createdAt: new Date(),
+      employeeId: payroll.employeeId,
+      period: payroll.period,
+      baseSalary: payroll.baseSalary,
+      overtime: payroll.overtime || "0.00",
+      bonuses: payroll.bonuses || "0.00",
+      grossSalary: payroll.grossSalary,
+      iessEmployee: payroll.iessEmployee,
+      incomeTax: payroll.incomeTax || "0.00",
+      netSalary: payroll.netSalary,
+      iessEmployer: payroll.iessEmployer,
       status: payroll.status || "pendiente",
-      overtime: payroll.overtime || null,
-      bonuses: payroll.bonuses || null,
-      incomeTax: payroll.incomeTax || null,
+      companyId: payroll.companyId,
+      createdAt: new Date(),
     };
     this.payrolls.set(id, newPayroll);
     return newPayroll;
@@ -490,9 +835,11 @@ export class MemStorage implements IStorage {
     return this.payrolls.delete(id);
   }
 
-  // System Settings
+  // SYSTEM SETTINGS
   async getSystemSetting(companyId: number, key: string): Promise<SystemSetting | undefined> {
-    return Array.from(this.systemSettings.values()).find(setting => setting.companyId === companyId && setting.key === key);
+    return Array.from(this.systemSettings.values()).find(
+      setting => setting.companyId === companyId && setting.key === key
+    );
   }
 
   async getSystemSettingsByCompany(companyId: number): Promise<SystemSetting[]> {
@@ -500,17 +847,20 @@ export class MemStorage implements IStorage {
   }
 
   async setSystemSetting(setting: InsertSystemSetting): Promise<SystemSetting> {
-    const existing = await this.getSystemSetting(setting.companyId, setting.key);
-    if (existing) {
-      return await this.updateSystemSetting(existing.id, setting) as SystemSetting;
+    const existingSetting = await this.getSystemSetting(setting.companyId, setting.key);
+    
+    if (existingSetting) {
+      return this.updateSystemSetting(existingSetting.id, setting) as Promise<SystemSetting>;
     }
     
     const id = this.currentSystemSettingId++;
     const newSetting: SystemSetting = {
-      ...setting,
       id,
+      key: setting.key,
+      value: setting.value,
+      type: setting.type || "string",
+      companyId: setting.companyId,
       updatedAt: new Date(),
-      type: setting.type || "general",
     };
     this.systemSettings.set(id, newSetting);
     return newSetting;

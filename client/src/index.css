@@ -3,68 +3,107 @@
 @tailwind utilities;
 
 :root {
-  --background: hsl(0, 0%, 100%);
-  --foreground: hsl(20, 14.3%, 4.1%);
-  --muted: hsl(60, 4.8%, 95.9%);
-  --muted-foreground: hsl(25, 5.3%, 44.7%);
+  /* Base colors - Modern professional palette */
+  --background: hsl(220, 13%, 97%);
+  --foreground: hsl(215, 25%, 27%);
+  --muted: hsl(220, 13%, 91%);
+  --muted-foreground: hsl(215, 20%, 65%);
   --popover: hsl(0, 0%, 100%);
-  --popover-foreground: hsl(20, 14.3%, 4.1%);
+  --popover-foreground: hsl(215, 25%, 27%);
   --card: hsl(0, 0%, 100%);
-  --card-foreground: hsl(20, 14.3%, 4.1%);
-  --border: hsl(20, 5.9%, 90%);
-  --input: hsl(20, 5.9%, 90%);
-  --primary: hsl(207, 90%, 54%);
-  --primary-foreground: hsl(211, 100%, 99%);
-  --secondary: hsl(60, 4.8%, 95.9%);
-  --secondary-foreground: hsl(24, 9.8%, 10%);
-  --accent: hsl(60, 4.8%, 95.9%);
-  --accent-foreground: hsl(24, 9.8%, 10%);
-  --destructive: hsl(0, 84.2%, 60.2%);
-  --destructive-foreground: hsl(60, 9.1%, 97.8%);
-  --ring: hsl(20, 14.3%, 4.1%);
-  --radius: 0.5rem;
+  --card-foreground: hsl(215, 25%, 27%);
+  --border: hsl(220, 13%, 87%);
+  --input: hsl(220, 13%, 91%);
+  
+  /* Primary - Professional blue inspired by Ecuador's flag */
+  --primary: hsl(214, 84%, 56%);
+  --primary-foreground: hsl(0, 0%, 100%);
+  
+  /* Secondary - Warm gray */
+  --secondary: hsl(220, 13%, 91%);
+  --secondary-foreground: hsl(215, 25%, 27%);
+  
+  /* Accent - Ecuador yellow */
+  --accent: hsl(45, 90%, 60%);
+  --accent-foreground: hsl(215, 25%, 27%);
+  
+  /* Destructive */
+  --destructive: hsl(0, 72%, 51%);
+  --destructive-foreground: hsl(0, 0%, 100%);
+  
+  --ring: hsl(214, 84%, 56%);
+  --radius: 0.75rem;
 
-  /* Primary color variations for design consistency */
-  --primary-50: hsl(210, 100%, 97%);
-  --primary-100: hsl(210, 100%, 93%);
+  /* Extended palette for professional design */
+  --primary-50: hsl(214, 100%, 97%);
+  --primary-100: hsl(214, 95%, 93%);
   --primary-200: hsl(213, 97%, 87%);
-  --primary-500: hsl(207, 90%, 54%);
-  --primary-600: hsl(207, 90%, 44%);
-  --primary-700: hsl(207, 90%, 34%);
+  --primary-300: hsl(212, 96%, 78%);
+  --primary-400: hsl(213, 94%, 68%);
+  --primary-500: hsl(214, 84%, 56%);
+  --primary-600: hsl(221, 83%, 53%);
+  --primary-700: hsl(224, 76%, 48%);
+  --primary-800: hsl(226, 71%, 40%);
+  --primary-900: hsl(224, 64%, 33%);
   
-  /* Success colors */
-  --success-500: hsl(158, 64%, 52%);
-  --success-600: hsl(159, 60%, 47%);
+  /* Success - Ecuador green tones */
+  --success-50: hsl(142, 76%, 96%);
+  --success-100: hsl(149, 80%, 90%);
+  --success-500: hsl(142, 71%, 45%);
+  --success-600: hsl(142, 76%, 36%);
+  --success-700: hsl(142, 72%, 29%);
   
-  /* Warning colors */
-  --warning-500: hsl(43, 96%, 56%);
-  --warning-600: hsl(37, 92%, 50%);
+  /* Warning - Professional amber */
+  --warning-50: hsl(48, 100%, 96%);
+  --warning-100: hsl(48, 96%, 89%);
+  --warning-500: hsl(38, 92%, 50%);
+  --warning-600: hsl(32, 95%, 44%);
+  --warning-700: hsl(26, 90%, 37%);
   
-  /* Error colors */
-  --error-500: hsl(0, 84%, 60%);
-  --error-600: hsl(0, 72%, 51%);
+  /* Error - Professional red */
+  --error-50: hsl(0, 93%, 94%);
+  --error-100: hsl(0, 93%, 89%);
+  --error-500: hsl(0, 72%, 51%);
+  --error-600: hsl(0, 70%, 45%);
+  --error-700: hsl(0, 65%, 38%);
+  
+  /* Neutral grays */
+  --gray-50: hsl(220, 13%, 97%);
+  --gray-100: hsl(220, 13%, 91%);
+  --gray-200: hsl(220, 13%, 87%);
+  --gray-300: hsl(220, 9%, 78%);
+  --gray-400: hsl(220, 9%, 68%);
+  --gray-500: hsl(220, 9%, 46%);
+  --gray-600: hsl(215, 14%, 34%);
+  --gray-700: hsl(215, 19%, 27%);
+  --gray-800: hsl(215, 28%, 17%);
+  --gray-900: hsl(221, 39%, 11%);
 }
 
 .dark {
-  --background: hsl(240, 10%, 3.9%);
-  --foreground: hsl(0, 0%, 98%);
-  --muted: hsl(240, 3.7%, 15.9%);
-  --muted-foreground: hsl(240, 5%, 64.9%);
-  --popover: hsl(240, 10%, 3.9%);
-  --popover-foreground: hsl(0, 0%, 98%);
-  --card: hsl(240, 10%, 3.9%);
-  --card-foreground: hsl(0, 0%, 98%);
-  --border: hsl(240, 3.7%, 15.9%);
-  --input: hsl(240, 3.7%, 15.9%);
-  --primary: hsl(207, 90%, 54%);
-  --primary-foreground: hsl(211, 100%, 99%);
-  --secondary: hsl(240, 3.7%, 15.9%);
-  --secondary-foreground: hsl(0, 0%, 98%);
-  --accent: hsl(240, 3.7%, 15.9%);
-  --accent-foreground: hsl(0, 0%, 98%);
-  --destructive: hsl(0, 62.8%, 30.6%);
-  --destructive-foreground: hsl(0, 0%, 98%);
-  --ring: hsl(240, 4.9%, 83.9%);
+  /* Dark mode - Professional dark theme */
+  --background: hsl(224, 71%, 4%);
+  --foreground: hsl(213, 31%, 91%);
+  --muted: hsl(223, 47%, 11%);
+  --muted-foreground: hsl(215.4, 16.3%, 56.9%);
+  --popover: hsl(224, 71%, 4%);
+  --popover-foreground: hsl(213, 31%, 91%);
+  --card: hsl(224, 71%, 4%);
+  --card-foreground: hsl(213, 31%, 91%);
+  --border: hsl(216, 34%, 17%);
+  --input: hsl(216, 34%, 17%);
+  
+  /* Primary remains the same professional blue */
+  --primary: hsl(214, 84%, 56%);
+  --primary-foreground: hsl(0, 0%, 100%);
+  
+  --secondary: hsl(223, 47%, 11%);
+  --secondary-foreground: hsl(213, 31%, 91%);
+  --accent: hsl(216, 34%, 17%);
+  --accent-foreground: hsl(213, 31%, 91%);
+  --destructive: hsl(0, 63%, 31%);
+  --destructive-foreground: hsl(213, 31%, 91%);
+  --ring: hsl(216, 34%, 17%);
 }
 
 @layer base {
@@ -127,6 +166,207 @@
 
 .border-primary-500 {
   border-color: hsl(var(--primary-500));
+}
+
+/* Professional enhancements for Ecuador accounting system */
+.glass-effect {
+  backdrop-filter: blur(16px) saturate(180%);
+  background-color: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.125);
+}
+
+.dark .glass-effect {
+  background-color: rgba(26, 32, 65, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.125);
+}
+
+.gradient-bg {
+  background: linear-gradient(135deg, hsl(var(--primary-500)) 0%, hsl(var(--primary-600)) 100%);
+}
+
+.hover-lift {
+  transition: all 0.2s ease-in-out;
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px -8px hsla(var(--primary-500), 0.3);
+}
+
+.card-shadow {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+.card-shadow-lg {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Status indicators for Ecuador compliance */
+.status-success {
+  @apply bg-green-100 text-green-700 border border-green-300;
+}
+
+.status-warning {
+  @apply bg-yellow-100 text-yellow-700 border border-yellow-300;
+}
+
+.status-error {
+  @apply bg-red-100 text-red-700 border border-red-300;
+}
+
+.status-info {
+  @apply bg-blue-100 text-blue-700 border border-blue-300;
+}
+
+.dark .status-success {
+  @apply bg-green-900/20 text-green-400 border-green-700;
+}
+
+.dark .status-warning {
+  @apply bg-yellow-900/20 text-yellow-400 border-yellow-700;
+}
+
+.dark .status-error {
+  @apply bg-red-900/20 text-red-400 border-red-700;
+}
+
+.dark .status-info {
+  @apply bg-blue-900/20 text-blue-400 border-blue-700;
+}
+
+/* Professional form enhancements */
+.form-field-enhanced {
+  @apply relative;
+}
+
+.form-field-enhanced input:focus + label,
+.form-field-enhanced input:not(:placeholder-shown) + label {
+  @apply transform -translate-y-6 scale-75 text-primary-600;
+}
+
+.form-field-enhanced label {
+  @apply absolute left-3 top-2 transition-all duration-200 pointer-events-none text-muted-foreground;
+}
+
+/* Professional navigation styles */
+.nav-link {
+  @apply relative px-4 py-2 rounded-lg transition-all duration-200 font-medium;
+}
+
+.nav-link::before {
+  content: '';
+  @apply absolute inset-0 bg-primary rounded-lg opacity-0 transition-opacity duration-200;
+}
+
+.nav-link:hover::before {
+  @apply opacity-10;
+}
+
+.nav-link.active {
+  @apply bg-blue-100 text-primary border border-blue-200;
+}
+
+.dark .nav-link.active {
+  @apply bg-blue-900 text-primary border-blue-700;
+}
+
+/* Professional table styles */
+.table-professional {
+  @apply w-full border-collapse;
+}
+
+.table-professional th {
+  @apply bg-gray-100 text-left py-3 px-4 font-semibold text-gray-700 border-b border-gray-300;
+}
+
+.dark .table-professional th {
+  @apply bg-gray-800 text-gray-300 border-gray-600;
+}
+
+.table-professional td {
+  @apply py-3 px-4 border-b border-gray-200;
+}
+
+.dark .table-professional td {
+  @apply border-gray-700;
+}
+
+.table-professional tr:hover {
+  @apply bg-gray-100;
+}
+
+.dark .table-professional tr:hover {
+  @apply bg-gray-800/50;
+}
+
+/* Ecuador flag colors for accents */
+.ecuador-yellow {
+  color: hsl(45, 90%, 60%);
+}
+
+.ecuador-blue {
+  color: hsl(214, 84%, 56%);
+}
+
+.ecuador-red {
+  color: hsl(0, 72%, 51%);
+}
+
+/* Professional loading states */
+.loading-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.loading-shimmer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.4),
+    transparent
+  );
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+/* Responsive design helpers */
+@media (max-width: 768px) {
+  .mobile-stack {
+    @apply flex-col space-y-2;
+  }
+  
+  .mobile-full {
+    @apply w-full;
+  }
+  
+  .mobile-hidden {
+    @apply hidden;
+  }
+}
+
+/* Print styles for reports */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  .print-full-width {
+    width: 100% !important;
+  }
+  
+  .print-break-before {
+    page-break-before: always;
+  }
 }
 
 .ring-primary-500 {

@@ -33,17 +33,56 @@ export const clients = pgTable("clients", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// Tabla para Proveedores
+export const suppliers = pgTable("suppliers", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  ruc: text("ruc").notNull(),
+  email: text("email"),
+  phone: text("phone"),
+  address: text("address"),
+  contactPerson: text("contact_person"),
+  category: text("category"), // bienes, servicios, arrendamientos, honorarios
+  paymentTerms: text("payment_terms").default("contado"),
+  isActive: boolean("is_active").default(true).notNull(),
+  companyId: integer("company_id").references(() => companies.id).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Tabla para Productos/Servicios
+export const products = pgTable("products", {
+  id: serial("id").primaryKey(),
+  code: text("code").notNull(),
+  name: text("name").notNull(),
+  description: text("description"),
+  category: text("category"),
+  unit: text("unit").default("unidad"), // unidad, kg, litros, etc.
+  purchasePrice: decimal("purchase_price", { precision: 10, scale: 2 }).default("0.00"),
+  salePrice: decimal("sale_price", { precision: 10, scale: 2 }).default("0.00"),
+  ivaRate: decimal("iva_rate", { precision: 5, scale: 2 }).default("15.00"),
+  stock: integer("stock").default(0),
+  minStock: integer("min_stock").default(0),
+  isActive: boolean("is_active").default(true).notNull(),
+  companyId: integer("company_id").references(() => companies.id).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const invoices = pgTable("invoices", {
   id: serial("id").primaryKey(),
   number: text("number").notNull(),
   date: timestamp("date").notNull(),
-  dueDate: timestamp("due_date"),
+  // Removido dueDate - Las facturas en Ecuador no llevan fecha de vencimiento
   subtotal: decimal("subtotal", { precision: 10, scale: 2 }).notNull().default("0"),
   iva: decimal("iva", { precision: 10, scale: 2 }).notNull().default("0"),
-  ivaRate: decimal("iva_rate", { precision: 5, scale: 2 }).notNull().default("15.00"), // IVA variable
+  ivaRate: decimal("iva_rate", { precision: 5, scale: 2 }).notNull().default("15.00"), // IVA actualizado 15%
+  ice: decimal("ice", { precision: 10, scale: 2 }).default("0.00"), // Impuesto a Consumos Especiales
   total: decimal("total", { precision: 10, scale: 2 }).notNull(),
-  status: text("status").notNull(), // 'pendiente', 'pagada', 'vencida'
+  status: text("status").notNull(), // 'pendiente', 'pagada', 'cancelada'
   type: text("type").notNull().default("factura"), // factura, proforma, nota_credito, nota_debito
+  paymentMethod: text("payment_method").default("efectivo"), // efectivo, tarjeta, transferencia, credito
+  authorizationCode: text("authorization_code"), // Código de autorización SRI
+  accessKey: text("access_key"), // Clave de acceso SRI
+  xmlSigned: text("xml_signed"), // XML firmado para SRI
   items: text("items").default("[]"),
   notes: text("notes").default(""),
   clientId: integer("client_id").references(() => clients.id).notNull(),
@@ -51,17 +90,48 @@ export const invoices = pgTable("invoices", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-// Tabla para Comprobantes de Retención
+// Tabla para Compras
+export const purchases = pgTable("purchases", {
+  id: serial("id").primaryKey(),
+  number: text("number").notNull(),
+  date: timestamp("date").notNull(),
+  subtotal: decimal("subtotal", { precision: 10, scale: 2 }).notNull().default("0"),
+  iva: decimal("iva", { precision: 10, scale: 2 }).notNull().default("0"),
+  ivaRate: decimal("iva_rate", { precision: 5, scale: 2 }).notNull().default("15.00"),
+  ice: decimal("ice", { precision: 10, scale: 2 }).default("0.00"),
+  retentionFuente: decimal("retention_fuente", { precision: 10, scale: 2 }).default("0.00"),
+  retentionIva: decimal("retention_iva", { precision: 10, scale: 2 }).default("0.00"),
+  total: decimal("total", { precision: 10, scale: 2 }).notNull(),
+  status: text("status").notNull().default("pendiente"), // pendiente, pagada, cancelada
+  type: text("type").notNull().default("compra"), // compra, gasto, activo
+  paymentMethod: text("payment_method").default("efectivo"),
+  authorizationCode: text("authorization_code"), // Código de autorización SRI
+  accessKey: text("access_key"), // Clave de acceso SRI
+  xmlSigned: text("xml_signed"), // XML firmado para SRI
+  items: text("items").default("[]"),
+  notes: text("notes").default(""),
+  supplierId: integer("supplier_id").references(() => suppliers.id).notNull(),
+  companyId: integer("company_id").references(() => companies.id).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Tabla para Comprobantes de Retención (Normativa Ecuador 2024)
 export const retentions = pgTable("retentions", {
   id: serial("id").primaryKey(),
   number: text("number").notNull(),
   date: timestamp("date").notNull(),
   type: text("type").notNull(), // fuente, iva
+  concept: text("concept").notNull(), // bienes, servicios, arrendamientos, honorarios
   percentage: decimal("percentage", { precision: 5, scale: 2 }).notNull(),
   baseAmount: decimal("base_amount", { precision: 10, scale: 2 }).notNull(),
   retentionAmount: decimal("retention_amount", { precision: 10, scale: 2 }).notNull(),
+  authorizationCode: text("authorization_code"), // Código de autorización SRI
+  accessKey: text("access_key"), // Clave de acceso SRI
+  xmlSigned: text("xml_signed"), // XML firmado para SRI
   invoiceId: integer("invoice_id").references(() => invoices.id, { onDelete: "cascade" }),
-  clientId: integer("client_id").references(() => clients.id).notNull(),
+  purchaseId: integer("purchase_id").references(() => purchases.id, { onDelete: "cascade" }),
+  clientId: integer("client_id").references(() => clients.id),
+  supplierId: integer("supplier_id").references(() => suppliers.id),
   companyId: integer("company_id").references(() => companies.id).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
@@ -164,9 +234,58 @@ export const insertClientSchema = createInsertSchema(clients).omit({
   createdAt: true,
 });
 
+export const insertSupplierSchema = createInsertSchema(suppliers).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertProductSchema = createInsertSchema(products).omit({
+  id: true,
+  createdAt: true,
+});
+
 export const insertInvoiceSchema = createInsertSchema(invoices).omit({
   id: true,
   createdAt: true,
+});
+
+export const insertPurchaseSchema = createInsertSchema(purchases).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertRetentionSchema = createInsertSchema(retentions).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertChartOfAccountSchema = createInsertSchema(chartOfAccounts).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertJournalEntrySchema = createInsertSchema(journalEntries).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertJournalEntryDetailSchema = createInsertSchema(journalEntryDetails).omit({
+  id: true,
+});
+
+export const insertEmployeeSchema = createInsertSchema(employees).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertPayrollSchema = createInsertSchema(payrolls).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertSystemSettingSchema = createInsertSchema(systemSettings).omit({
+  id: true,
+  updatedAt: true,
 });
 
 // Auth schemas
@@ -190,52 +309,54 @@ export type Company = typeof companies.$inferSelect;
 export type InsertCompany = z.infer<typeof insertCompanySchema>;
 export type Client = typeof clients.$inferSelect;
 export type InsertClient = z.infer<typeof insertClientSchema>;
+export type Supplier = typeof suppliers.$inferSelect;
+export type InsertSupplier = z.infer<typeof insertSupplierSchema>;
+export type Product = typeof products.$inferSelect;
+export type InsertProduct = z.infer<typeof insertProductSchema>;
 export type Invoice = typeof invoices.$inferSelect;
 export type InsertInvoice = z.infer<typeof insertInvoiceSchema>;
+export type Purchase = typeof purchases.$inferSelect;
+export type InsertPurchase = z.infer<typeof insertPurchaseSchema>;
+export type Retention = typeof retentions.$inferSelect;
+export type InsertRetention = z.infer<typeof insertRetentionSchema>;
+export type ChartOfAccount = typeof chartOfAccounts.$inferSelect;
+export type InsertChartOfAccount = z.infer<typeof insertChartOfAccountSchema>;
+export type JournalEntry = typeof journalEntries.$inferSelect;
+export type InsertJournalEntry = z.infer<typeof insertJournalEntrySchema>;
+export type JournalEntryDetail = typeof journalEntryDetails.$inferSelect;
+export type InsertJournalEntryDetail = z.infer<typeof insertJournalEntryDetailSchema>;
+export type Employee = typeof employees.$inferSelect;
+export type InsertEmployee = z.infer<typeof insertEmployeeSchema>;
+export type Payroll = typeof payrolls.$inferSelect;
+export type InsertPayroll = z.infer<typeof insertPayrollSchema>;
+export type SystemSetting = typeof systemSettings.$inferSelect;
+export type InsertSystemSetting = z.infer<typeof insertSystemSettingSchema>;
 export type LoginData = z.infer<typeof loginSchema>;
 export type RegisterData = z.infer<typeof registerSchema>;
 
-// Nuevos tipos para las tablas agregadas
-export type Retention = typeof retentions.$inferSelect;
-export type InsertRetention = typeof retentions.$inferInsert;
-export type ChartOfAccount = typeof chartOfAccounts.$inferSelect;
-export type InsertChartOfAccount = typeof chartOfAccounts.$inferInsert;
-export type JournalEntry = typeof journalEntries.$inferSelect;
-export type InsertJournalEntry = typeof journalEntries.$inferInsert;
-export type JournalEntryDetail = typeof journalEntryDetails.$inferSelect;
-export type InsertJournalEntryDetail = typeof journalEntryDetails.$inferInsert;
-export type Employee = typeof employees.$inferSelect;
-export type InsertEmployee = typeof employees.$inferInsert;
-export type Payroll = typeof payrolls.$inferSelect;
-export type InsertPayroll = typeof payrolls.$inferInsert;
-export type SystemSetting = typeof systemSettings.$inferSelect;
-export type InsertSystemSetting = typeof systemSettings.$inferInsert;
-
-// Schemas de inserción para las nuevas tablas
-export const insertRetentionSchema = createInsertSchema(retentions).omit({
-  id: true,
-  createdAt: true,
-});
-export const insertChartOfAccountSchema = createInsertSchema(chartOfAccounts).omit({
-  id: true,
-  createdAt: true,
-});
-export const insertJournalEntrySchema = createInsertSchema(journalEntries).omit({
-  id: true,
-  createdAt: true,
-});
-export const insertJournalEntryDetailSchema = createInsertSchema(journalEntryDetails).omit({
-  id: true,
-});
-export const insertEmployeeSchema = createInsertSchema(employees).omit({
-  id: true,
-  createdAt: true,
-});
-export const insertPayrollSchema = createInsertSchema(payrolls).omit({
-  id: true,
-  createdAt: true,
-});
-export const insertSystemSettingSchema = createInsertSchema(systemSettings).omit({
-  id: true,
-  updatedAt: true,
-});
+// Constantes para tasas impositivas Ecuador 2024
+export const ECUADOR_TAX_RATES = {
+  IVA: {
+    GENERAL: 15.0,
+    REDUCIDO: 5.0,
+    CERO: 0.0
+  },
+  RETENCIONES: {
+    FUENTE: {
+      BIENES: 1.0,
+      SERVICIOS: 2.0,
+      ARRENDAMIENTOS: 8.0,
+      HONORARIOS: 10.0
+    },
+    IVA: {
+      BIENES: 30.0,
+      SERVICIOS: 70.0
+    }
+  },
+  ICE: {
+    VEHICULOS_MIN: 5.0,
+    VEHICULOS_MAX: 35.0,
+    BEBIDAS_AZUCARADAS: 20.0,
+    CIGARRILLOS: 50.0
+  }
+};
