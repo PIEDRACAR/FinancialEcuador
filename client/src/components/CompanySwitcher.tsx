@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Building2, ChevronDown, Plus } from "lucide-react";
 import { useCompany } from "@/contexts/CompanyContext";
-import CreateCompanyModal from "./CreateCompanyModal";
+import CreateCompanyModalNew from "./CreateCompanyModalNew";
 
 export default function CompanySwitcher() {
   const { companies, selectedCompany, selectCompany } = useCompany();
@@ -59,7 +59,7 @@ export default function CompanySwitcher() {
         </div>
       )}
 
-      <CreateCompanyModal
+      <CreateCompanyModalNew
         open={showCreateModal}
         onOpenChange={setShowCreateModal}
       />
