@@ -360,7 +360,7 @@ export type InsertSystemSetting = z.infer<typeof insertSystemSettingSchema>;
 export type LoginData = z.infer<typeof loginSchema>;
 export type RegisterData = z.infer<typeof registerSchema>;
 
-// Constantes para tasas impositivas Ecuador 2024 - Actualizadas según normativa vigente
+// Constantes para tasas impositivas Ecuador 2024 - JULIO 2024 ACTUALIZADO
 export const ECUADOR_TAX_RATES = {
   IVA: {
     GENERAL: 15.0,
@@ -368,22 +368,37 @@ export const ECUADOR_TAX_RATES = {
     CERO: 0.0
   },
   RETENCIONES: {
-    FUENTE: {
-      BIENES: 1.0,
-      SERVICIOS: 2.0,
-      ARRENDAMIENTOS: 8.0,
+    RENTA: {
+      BIENES: 1.75,
+      SERVICIOS: 3.5,
+      ARRENDAMIENTOS: 10.0,
       HONORARIOS: 10.0,
       TRANSPORTE: 1.0,
       COMBUSTIBLES: 0.3,
       SEGUROS: 1.0,
       RENDIMIENTOS_FINANCIEROS: 2.0,
-      OTROS_SERVICIOS: 2.0
+      OTROS_SERVICIOS: 3.5
     },
     IVA: {
       BIENES: 30.0,
       SERVICIOS: 70.0,
       SERVICIOS_PROFESIONALES: 100.0
     }
+  },
+  IMPUESTO_RENTA: {
+    // Tabla progresiva personas naturales 2024
+    TRAMOS: [
+      { desde: 0, hasta: 11722, porcentaje: 0, deduccion: 0 },
+      { desde: 11722, hasta: 14930, porcentaje: 5, deduccion: 586 },
+      { desde: 14930, hasta: 19385, porcentaje: 10, deduccion: 1332 },
+      { desde: 19385, hasta: 25638, porcentaje: 12, deduccion: 1720 },
+      { desde: 25638, hasta: 33738, porcentaje: 15, deduccion: 2489 },
+      { desde: 33738, hasta: 44721, porcentaje: 20, deduccion: 4176 },
+      { desde: 44721, hasta: 59537, porcentaje: 25, deduccion: 6412 },
+      { desde: 59537, hasta: 79388, porcentaje: 30, deduccion: 9388 },
+      { desde: 79388, hasta: 105580, porcentaje: 35, deduccion: 13360 },
+      { desde: 105580, hasta: Infinity, porcentaje: 37, deduccion: 15472 }
+    ]
   },
   ICE: {
     VEHICULOS_MIN: 5.0,
@@ -399,7 +414,13 @@ export const ECUADOR_TAX_RATES = {
     IESS_TOTAL: 21.60,
     FONDOS_RESERVA: 8.33,
     DECIMO_TERCERO: 8.33,
-    DECIMO_CUARTO: 400.00, // Salario mínimo vital
+    DECIMO_CUARTO: 450.00, // Salario básico unificado 2024
     VACACIONES: 4.17
+  },
+  SRI: {
+    RUC_VALIDATION_ENDPOINT: "https://srienlinea.sri.gob.ec/sri-en-linea/SriRucWeb/ConsultaRuc",
+    XML_SCHEMA_VERSION: "2.1.0",
+    AMBIENTE_PRUEBAS: 1,
+    AMBIENTE_PRODUCCION: 2
   }
 };
