@@ -110,7 +110,21 @@ export default function CreateCompanyModalNew({ open, onOpenChange }: CreateComp
       console.log("NEW MODAL - SRI response:", data);
 
       if (!response.ok) {
-        throw new Error(data.error || "Error consultando RUC");
+        // Mostrar mensaje específico sobre la falta de conexión al SRI
+        const errorMessage = data.error || "Error consultando RUC";
+        if (errorMessage.includes("SRI de Ecuador")) {
+          setSearchError(`
+            IMPORTANTE: Este sistema no tiene acceso directo a la base de datos del SRI de Ecuador.
+            
+            Para obtener información oficial del RUC ${ruc}:
+            1. Visite: https://srienlinea.sri.gob.ec/facturacion-internet/consultas/publico/ruc-datos2.jspa
+            2. Consulte los datos oficiales
+            3. Ingrese manualmente la información de la empresa en el formulario
+          `);
+        } else {
+          setSearchError(errorMessage);
+        }
+        return;
       }
 
       setSriData(data);
@@ -224,9 +238,19 @@ export default function CreateCompanyModalNew({ open, onOpenChange }: CreateComp
                   </div>
                   <FormMessage />
                   {searchError && (
-                    <div className="flex items-center gap-1 text-sm text-destructive">
-                      <AlertCircle className="h-3 w-3" />
-                      {searchError}
+                    <div className="mt-2 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                      <div className="flex items-start gap-2">
+                        <AlertCircle className="h-5 w-5 text-yellow-600 mt-0.5 flex-shrink-0" />
+                        <div>
+                          <h4 className="font-semibold text-yellow-800 mb-1">Información Importante</h4>
+                          <div className="text-sm text-yellow-700 whitespace-pre-line">
+                            {searchError}
+                          </div>
+                          <div className="mt-2 text-xs text-yellow-600">
+                            💡 Complete manualmente los campos del formulario con la información oficial del SRI
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   )}
                   {field.value.length > 0 && field.value.length < 13 && (
