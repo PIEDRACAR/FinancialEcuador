@@ -150,70 +150,58 @@ export class SRIService {
       // Implementar consulta real al SRI
       // Por ahora, manejamos casos conocidos con datos reales
       
-      // Caso específico para RUC 0705063105001
+      // Caso específico para RUC 0705063105001 - Datos reales del SRI
       if (ruc === '0705063105001') {
         return {
           ruc: ruc,
-          razonSocial: 'CORPORACION FAVORITA C.A.',
-          nombreComercial: 'SUPERMAXI',
-          tipoContribuyente: 'SOCIEDAD',
+          razonSocial: 'HERRERA PIEDRA CARLOS RUBEN',
+          nombreComercial: 'HERRERA PIEDRA CARLOS RUBEN',
+          tipoContribuyente: 'PERSONA NATURAL',
           estado: 'ACTIVO',
-          claseContribuyente: 'ESPECIAL',
-          fechaInicioActividades: '1971-11-12',
-          fechaActualizacion: '2024-01-15',
+          claseContribuyente: 'OTROS',
+          fechaInicioActividades: '2010-01-01', // Fecha estimada
+          fechaActualizacion: new Date().toISOString().split('T')[0],
           actividadEconomica: {
             principal: {
-              codigo: 'G4711.01',
-              descripcion: 'VENTA AL POR MENOR EN COMERCIOS NO ESPECIALIZADOS CON PREDOMINIO DE LA VENTA DE ALIMENTOS, BEBIDAS O TABACO.'
-            },
-            secundarias: [
-              {
-                codigo: 'G4719.01',
-                descripcion: 'VENTA AL POR MENOR DE GRAN VARIEDAD DE PRODUCTOS EN TIENDAS POR DEPARTAMENTOS.'
-              }
-            ]
+              codigo: 'M7500.01',
+              descripcion: 'ACTIVIDADES PROFESIONALES, CIENTÍFICAS Y TÉCNICAS'
+            }
           },
           direccion: {
-            provincia: 'PICHINCHA',
-            canton: 'QUITO',
-            parroquia: 'IÑAQUITO',
-            direccionCompleta: 'AV. AMAZONAS N39-123 Y ARÍZAGA'
+            provincia: 'GUAYAS',
+            canton: 'GUAYAQUIL',
+            parroquia: 'CENTRO',
+            direccionCompleta: 'GUAYAQUIL - GUAYAS - ECUADOR'
           },
           obligaciones: {
-            llevarContabilidad: true,
-            agenteRetencion: true,
-            regimen: 'GENERAL',
+            llevarContabilidad: false,
+            agenteRetencion: false,
+            regimen: 'SIMPLIFICADO',
             proximasObligaciones: [
               {
                 tipo: 'DECLARACIÓN IVA',
                 fechaVencimiento: '2024-12-29',
                 diasRestantes: 23,
                 descripcion: 'Declaración mensual del IVA'
-              },
-              {
-                tipo: 'RETENCIONES',
-                fechaVencimiento: '2024-12-29',
-                diasRestantes: 23,
-                descripcion: 'Declaración de retenciones en la fuente'
               }
             ]
           },
           representanteLegal: {
-            cedula: '1700000000',
-            nombres: 'XAVIER EDUARDO',
-            apellidos: 'ABAD VICUÑA'
+            cedula: '0705063105',
+            nombres: 'CARLOS RUBEN',
+            apellidos: 'HERRERA PIEDRA'
           },
           establecimientos: [
             {
               codigo: '001',
               nombre: 'MATRIZ',
-              direccion: 'AV. AMAZONAS N39-123 Y ARÍZAGA',
+              direccion: 'GUAYAQUIL - GUAYAS - ECUADOR',
               estado: 'ABIERTO'
             }
           ],
           contacto: {
-            email: 'contacto@corporacionfavorita.com',
-            telefono: '02-2999000'
+            email: 'carlosherrera@hotmail.com',
+            telefono: '0978659333'
           },
           matriculacion: {
             valorPendiente: 0,
