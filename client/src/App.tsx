@@ -179,6 +179,11 @@ function Router() {
           <ImportAccountingPage />
         </DashboardWrapper>
       </Route>
+      <Route path="/dashboard/import-sri">
+        <DashboardWrapper>
+          <ImportAccountingPage />
+        </DashboardWrapper>
+      </Route>
       <Route path="/">
         <DashboardWrapper>
           <DashboardPage />
