@@ -31,6 +31,9 @@ import ChartAccountsPage from "@/pages/ChartAccountsPage";
 import JournalEntriesPage from "@/pages/JournalEntriesPage";
 import LedgerPage from "@/pages/LedgerPage";
 import BalanceSheetPage from "@/pages/BalanceSheetPage";
+import SRIReportsPage from "@/pages/SRIReportsPage";
+import SRIDeclarationsPage from "@/pages/SRIDeclarationsPage";
+import ImportAccountingPage from "@/pages/ImportAccountingPage";
 import NotFound from "@/pages/not-found";
 
 // Wrapper component for all dashboard routes
@@ -154,6 +157,21 @@ function Router() {
       <Route path="/dashboard/settings">
         <DashboardWrapper>
           <SettingsPage />
+        </DashboardWrapper>
+      </Route>
+      <Route path="/dashboard/sri-reports">
+        <DashboardWrapper>
+          <SRIReportsPage />
+        </DashboardWrapper>
+      </Route>
+      <Route path="/dashboard/sri-declarations">
+        <DashboardWrapper>
+          <SRIDeclarationsPage />
+        </DashboardWrapper>
+      </Route>
+      <Route path="/dashboard/import-accounting">
+        <DashboardWrapper>
+          <ImportAccountingPage />
         </DashboardWrapper>
       </Route>
       <Route path="/">

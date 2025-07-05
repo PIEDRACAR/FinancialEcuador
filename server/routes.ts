@@ -1144,6 +1144,132 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ===== RUTAS PARA SRI DECLARACIONES =====
+  
+  app.get("/api/sri/declarations", requireAuth, async (req, res) => {
+    const companyId = parseInt(req.query.companyId as string);
+    if (!companyId) {
+      return res.status(400).json({ message: "Company ID es requerido" });
+    }
+    
+    // Mock declarations data
+    const declarations = [
+      {
+        id: "1",
+        form: "104",
+        period: "2024-07",
+        status: "processed",
+        submittedAt: "2024-07-15T10:30:00Z",
+        processedAt: "2024-07-16T14:20:00Z",
+        amount: 1250.50,
+        dueDate: "2024-07-28",
+        description: "Declaración mensual de IVA"
+      },
+      {
+        id: "2",
+        form: "103",
+        period: "2024-07",
+        status: "submitted",
+        submittedAt: "2024-07-15T11:45:00Z",
+        amount: 850.75,
+        dueDate: "2024-07-28",
+        description: "Declaración de retenciones en la fuente"
+      }
+    ];
+    
+    res.json(declarations);
+  });
+
+  app.post("/api/sri/submit-declaration", requireAuth, async (req, res) => {
+    try {
+      const { form, period, companyId, data } = req.body;
+      
+      if (!form || !period || !companyId) {
+        return res.status(400).json({ message: "Campos requeridos: form, period, companyId" });
+      }
+      
+      // Simulate declaration submission
+      const declaration = {
+        id: Date.now().toString(),
+        form,
+        period,
+        status: "submitted",
+        submittedAt: new Date().toISOString(),
+        amount: data.totalSales || data.totalRetentions || 0,
+        dueDate: new Date(period + '-28').toISOString().split('T')[0],
+        description: form === "104" ? "Declaración mensual de IVA" : "Declaración de retenciones"
+      };
+      
+      res.json({
+        success: true,
+        declaration,
+        message: `Declaración ${form} enviada exitosamente`
+      });
+    } catch (error) {
+      res.status(500).json({ 
+        message: "Error enviando declaración",
+        error: error instanceof Error ? error.message : "Error desconocido"
+      });
+    }
+  });
+
+  // ===== RUTAS PARA IMPORTACIÓN CONTABLE =====
+  
+  app.get("/api/import/history", requireAuth, async (req, res) => {
+    const companyId = parseInt(req.query.companyId as string);
+    if (!companyId) {
+      return res.status(400).json({ message: "Company ID es requerido" });
+    }
+    
+    // Mock import history
+    const history = [
+      {
+        id: "1",
+        type: "clients",
+        fileName: "clientes_julio_2024.xlsx",
+        recordsImported: 145,
+        recordsRejected: 3,
+        status: "partial",
+        importedAt: "2024-07-05T10:30:00Z",
+        errors: ["RUC inválido en fila 15", "Email duplicado en fila 78"]
+      },
+      {
+        id: "2",
+        type: "products",
+        fileName: "productos_actualizados.csv",
+        recordsImported: 89,
+        recordsRejected: 0,
+        status: "success",
+        importedAt: "2024-07-04T14:20:00Z"
+      }
+    ];
+    
+    res.json(history);
+  });
+
+  app.post("/api/import", requireAuth, async (req, res) => {
+    try {
+      const { type, companyId } = req.body;
+      
+      if (!type || !companyId) {
+        return res.status(400).json({ message: "Campos requeridos: type, companyId" });
+      }
+      
+      // Simulate file processing
+      res.json({
+        success: true,
+        recordsImported: Math.floor(Math.random() * 100) + 50,
+        recordsRejected: Math.floor(Math.random() * 5),
+        message: "Importación completada exitosamente"
+      });
+    } catch (error) {
+      res.status(500).json({ 
+        message: "Error en importación",
+        error: error instanceof Error ? error.message : "Error desconocido"
+      });
+    }
+  });
+
   // Estado del sistema
   app.get("/api/system/health", async (req, res) => {
     try {
