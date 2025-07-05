@@ -69,6 +69,11 @@ function Router() {
           <InvoicesPage />
         </DashboardWrapper>
       </Route>
+      <Route path="/invoices">
+        <DashboardWrapper>
+          <InvoicesPage />
+        </DashboardWrapper>
+      </Route>
       <Route path="/dashboard/reports">
         <DashboardWrapper>
           <ReportsPage />

@@ -14,11 +14,13 @@ import { useRef } from "react";
 
 interface ImportDropdownProps {
   type: string; // clients, suppliers, products, purchases, employees
-  onImport: (file: File) => void;
+  onImport?: (file: File) => void;
+  onFileSelect?: (file: File) => void;
+  acceptedTypes?: string;
   disabled?: boolean;
 }
 
-export function ImportDropdown({ type, onImport, disabled = false }: ImportDropdownProps) {
+export function ImportDropdown({ type, onImport, onFileSelect, acceptedTypes, disabled = false }: ImportDropdownProps) {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -56,7 +58,11 @@ export function ImportDropdown({ type, onImport, disabled = false }: ImportDropd
       return;
     }
 
-    onImport(file);
+    if (onImport) {
+      onImport(file);
+    } else if (onFileSelect) {
+      onFileSelect(file);
+    }
     
     // Limpiar input
     if (fileInputRef.current) {

@@ -62,15 +62,15 @@ export default function RetentionsPage() {
 
   const retentionRates = {
     fuente: {
-      '303': { name: 'Honorarios profesionales', rate: 8 },
+      '303': { name: 'Honorarios profesionales', rate: 10 },
       '304': { name: 'Servicios predomina intelecto', rate: 8 },
       '307': { name: 'Servicios predomina mano obra', rate: 2 },
       '308': { name: 'Utilización o aprovechamiento imagen', rate: 10 },
       '309': { name: 'Servicios entre sociedades', rate: 2 },
-      '310': { name: 'Arrendamiento inmuebles', rate: 8 },
+      '310': { name: 'Arrendamiento inmuebles', rate: 10 },
       '312': { name: 'Transporte privado', rate: 1 },
       '319': { name: 'Otros servicios', rate: 2 },
-      '320': { name: 'Transferencia bienes muebles', rate: 1 },
+      '320': { name: 'Transferencia bienes muebles', rate: 1.75 },
     },
     iva: {
       '725': { name: 'Retención 30% IVA', rate: 30 },

@@ -187,29 +187,165 @@ export class MemStorage implements IStorage {
       password: "password123"
     });
 
-    // Plan de cuentas estándar Ecuador
+    // Plan de cuentas estándar Ecuador según normativa NIIF
     const defaultChartOfAccounts = [
       // ACTIVOS
       { code: "1", name: "ACTIVOS", type: "activo", level: 1 },
-      { code: "1.01", name: "ACTIVOS CORRIENTES", type: "activo", level: 2 },
-      { code: "1.01.01", name: "EFECTIVO Y EQUIVALENTES", type: "activo", level: 3 },
-      { code: "1.01.01.001", name: "Caja General", type: "activo", level: 4 },
-      { code: "1.01.01.002", name: "Banco Pichincha", type: "activo", level: 4 },
-      { code: "1.01.02", name: "CUENTAS POR COBRAR", type: "activo", level: 3 },
-      { code: "1.01.02.001", name: "Clientes", type: "activo", level: 4 },
-      { code: "1.01.03", name: "INVENTARIOS", type: "activo", level: 3 },
-      { code: "1.01.03.001", name: "Mercaderías", type: "activo", level: 4 },
-      { code: "1.01.04", name: "IMPUESTOS POR COBRAR", type: "activo", level: 3 },
-      { code: "1.01.04.001", name: "IVA Pagado", type: "activo", level: 4 },
-      { code: "1.01.04.002", name: "Retención Fuente por Cobrar", type: "activo", level: 4 },
+      { code: "1.1", name: "ACTIVO CORRIENTE", type: "activo", level: 2 },
+      { code: "1.1.01", name: "EFECTIVO Y EQUIVALENTES DE EFECTIVO", type: "activo", level: 3 },
+      { code: "1.1.01.01", name: "Caja General", type: "activo", level: 4 },
+      { code: "1.1.01.02", name: "Caja Chica", type: "activo", level: 4 },
+      { code: "1.1.01.03", name: "Banco Pichincha Cta. Corriente", type: "activo", level: 4 },
+      { code: "1.1.01.04", name: "Banco Pacífico Cta. Ahorros", type: "activo", level: 4 },
+      { code: "1.1.01.05", name: "Banco Guayaquil Cta. Corriente", type: "activo", level: 4 },
+      
+      { code: "1.1.02", name: "INVERSIONES TEMPORALES", type: "activo", level: 3 },
+      { code: "1.1.02.01", name: "Inversiones en Títulos Valores", type: "activo", level: 4 },
+      { code: "1.1.02.02", name: "Depósitos a Plazo Fijo", type: "activo", level: 4 },
+      
+      { code: "1.1.03", name: "CUENTAS Y DOCUMENTOS POR COBRAR", type: "activo", level: 3 },
+      { code: "1.1.03.01", name: "Clientes Nacionales", type: "activo", level: 4 },
+      { code: "1.1.03.02", name: "Clientes del Exterior", type: "activo", level: 4 },
+      { code: "1.1.03.03", name: "Documentos por Cobrar", type: "activo", level: 4 },
+      { code: "1.1.03.04", name: "Cheques por Cobrar", type: "activo", level: 4 },
+      { code: "1.1.03.05", name: "Provisión Cuentas Incobrables", type: "activo", level: 4 },
+      
+      { code: "1.1.04", name: "INVENTARIOS", type: "activo", level: 3 },
+      { code: "1.1.04.01", name: "Inventario de Mercaderías", type: "activo", level: 4 },
+      { code: "1.1.04.02", name: "Inventario de Materia Prima", type: "activo", level: 4 },
+      { code: "1.1.04.03", name: "Inventario de Productos en Proceso", type: "activo", level: 4 },
+      { code: "1.1.04.04", name: "Inventario de Productos Terminados", type: "activo", level: 4 },
+      { code: "1.1.04.05", name: "Inventario de Suministros y Materiales", type: "activo", level: 4 },
+      
+      { code: "1.1.05", name: "SERVICIOS Y OTROS PAGOS ANTICIPADOS", type: "activo", level: 3 },
+      { code: "1.1.05.01", name: "Seguros Pagados por Anticipado", type: "activo", level: 4 },
+      { code: "1.1.05.02", name: "Arriendos Pagados por Anticipado", type: "activo", level: 4 },
+      { code: "1.1.05.03", name: "Anticipo a Proveedores", type: "activo", level: 4 },
+      
+      { code: "1.1.06", name: "ACTIVOS POR IMPUESTOS CORRIENTES", type: "activo", level: 3 },
+      { code: "1.1.06.01", name: "Crédito Tributario IVA", type: "activo", level: 4 },
+      { code: "1.1.06.02", name: "Crédito Tributario Renta", type: "activo", level: 4 },
+      { code: "1.1.06.03", name: "Anticipo Impuesto Renta", type: "activo", level: 4 },
+      { code: "1.1.06.04", name: "Retenciones en la Fuente", type: "activo", level: 4 },
+      { code: "1.1.06.05", name: "Retenciones de IVA", type: "activo", level: 4 },
+      
+      // ACTIVO NO CORRIENTE
+      { code: "1.2", name: "ACTIVO NO CORRIENTE", type: "activo", level: 2 },
+      { code: "1.2.01", name: "PROPIEDADES, PLANTA Y EQUIPO", type: "activo", level: 3 },
+      { code: "1.2.01.01", name: "Terrenos", type: "activo", level: 4 },
+      { code: "1.2.01.02", name: "Edificios", type: "activo", level: 4 },
+      { code: "1.2.01.03", name: "Muebles y Enseres", type: "activo", level: 4 },
+      { code: "1.2.01.04", name: "Maquinaria y Equipo", type: "activo", level: 4 },
+      { code: "1.2.01.05", name: "Equipo de Computación", type: "activo", level: 4 },
+      { code: "1.2.01.06", name: "Vehículos", type: "activo", level: 4 },
+      { code: "1.2.01.07", name: "Equipo de Oficina", type: "activo", level: 4 },
+      
+      { code: "1.2.02", name: "DEPRECIACIÓN ACUMULADA", type: "activo", level: 3 },
+      { code: "1.2.02.01", name: "Dep. Acum. Edificios", type: "activo", level: 4 },
+      { code: "1.2.02.02", name: "Dep. Acum. Muebles y Enseres", type: "activo", level: 4 },
+      { code: "1.2.02.03", name: "Dep. Acum. Maquinaria y Equipo", type: "activo", level: 4 },
+      { code: "1.2.02.04", name: "Dep. Acum. Equipo de Computación", type: "activo", level: 4 },
+      { code: "1.2.02.05", name: "Dep. Acum. Vehículos", type: "activo", level: 4 },
+      { code: "1.2.02.06", name: "Dep. Acum. Equipo de Oficina", type: "activo", level: 4 },
       
       // PASIVOS
       { code: "2", name: "PASIVOS", type: "pasivo", level: 1 },
-      { code: "2.01", name: "PASIVOS CORRIENTES", type: "pasivo", level: 2 },
-      { code: "2.01.01", name: "CUENTAS POR PAGAR", type: "pasivo", level: 3 },
-      { code: "2.01.01.001", name: "Proveedores", type: "pasivo", level: 4 },
-      { code: "2.01.02", name: "IMPUESTOS POR PAGAR", type: "pasivo", level: 3 },
-      { code: "2.01.02.001", name: "IVA por Pagar", type: "pasivo", level: 4 },
+      { code: "2.1", name: "PASIVO CORRIENTE", type: "pasivo", level: 2 },
+      { code: "2.1.01", name: "CUENTAS Y DOCUMENTOS POR PAGAR", type: "pasivo", level: 3 },
+      { code: "2.1.01.01", name: "Proveedores Nacionales", type: "pasivo", level: 4 },
+      { code: "2.1.01.02", name: "Proveedores del Exterior", type: "pasivo", level: 4 },
+      { code: "2.1.01.03", name: "Documentos por Pagar", type: "pasivo", level: 4 },
+      
+      { code: "2.1.02", name: "OBLIGACIONES CON INSTITUCIONES FINANCIERAS", type: "pasivo", level: 3 },
+      { code: "2.1.02.01", name: "Sobregiros Bancarios", type: "pasivo", level: 4 },
+      { code: "2.1.02.02", name: "Préstamos Bancarios C.P.", type: "pasivo", level: 4 },
+      
+      { code: "2.1.03", name: "PROVISIONES", type: "pasivo", level: 3 },
+      { code: "2.1.03.01", name: "Décimo Tercer Sueldo", type: "pasivo", level: 4 },
+      { code: "2.1.03.02", name: "Décimo Cuarto Sueldo", type: "pasivo", level: 4 },
+      { code: "2.1.03.03", name: "Vacaciones por Pagar", type: "pasivo", level: 4 },
+      { code: "2.1.03.04", name: "Participación Trabajadores", type: "pasivo", level: 4 },
+      
+      { code: "2.1.04", name: "PASIVOS POR IMPUESTOS CORRIENTES", type: "pasivo", level: 3 },
+      { code: "2.1.04.01", name: "IVA por Pagar", type: "pasivo", level: 4 },
+      { code: "2.1.04.02", name: "Retenciones en la Fuente por Pagar", type: "pasivo", level: 4 },
+      { code: "2.1.04.03", name: "Retenciones de IVA por Pagar", type: "pasivo", level: 4 },
+      { code: "2.1.04.04", name: "Impuesto a la Renta por Pagar", type: "pasivo", level: 4 },
+      { code: "2.1.04.05", name: "Contribuciones IESS por Pagar", type: "pasivo", level: 4 },
+      
+      // PASIVO NO CORRIENTE
+      { code: "2.2", name: "PASIVO NO CORRIENTE", type: "pasivo", level: 2 },
+      { code: "2.2.01", name: "OBLIGACIONES A LARGO PLAZO", type: "pasivo", level: 3 },
+      { code: "2.2.01.01", name: "Préstamos Bancarios L.P.", type: "pasivo", level: 4 },
+      { code: "2.2.01.02", name: "Documentos por Pagar L.P.", type: "pasivo", level: 4 },
+      
+      // PATRIMONIO
+      { code: "3", name: "PATRIMONIO", type: "patrimonio", level: 1 },
+      { code: "3.1", name: "CAPITAL", type: "patrimonio", level: 2 },
+      { code: "3.1.01", name: "Capital Suscrito y Pagado", type: "patrimonio", level: 3 },
+      { code: "3.1.01.01", name: "Capital Social", type: "patrimonio", level: 4 },
+      
+      { code: "3.2", name: "RESERVAS", type: "patrimonio", level: 2 },
+      { code: "3.2.01", name: "Reserva Legal", type: "patrimonio", level: 3 },
+      { code: "3.2.02", name: "Reserva Facultativa", type: "patrimonio", level: 3 },
+      
+      { code: "3.3", name: "RESULTADOS", type: "patrimonio", level: 2 },
+      { code: "3.3.01", name: "Utilidades Acumuladas", type: "patrimonio", level: 3 },
+      { code: "3.3.02", name: "Utilidad del Ejercicio", type: "patrimonio", level: 3 },
+      { code: "3.3.03", name: "Pérdida del Ejercicio", type: "patrimonio", level: 3 },
+      
+      // INGRESOS
+      { code: "4", name: "INGRESOS", type: "ingreso", level: 1 },
+      { code: "4.1", name: "INGRESOS OPERACIONALES", type: "ingreso", level: 2 },
+      { code: "4.1.01", name: "VENTAS", type: "ingreso", level: 3 },
+      { code: "4.1.01.01", name: "Ventas Tarifa 15%", type: "ingreso", level: 4 },
+      { code: "4.1.01.02", name: "Ventas Tarifa 5%", type: "ingreso", level: 4 },
+      { code: "4.1.01.03", name: "Ventas Tarifa 0%", type: "ingreso", level: 4 },
+      { code: "4.1.01.04", name: "Exportaciones", type: "ingreso", level: 4 },
+      
+      { code: "4.1.02", name: "PRESTACIÓN DE SERVICIOS", type: "ingreso", level: 3 },
+      { code: "4.1.02.01", name: "Servicios Gravados", type: "ingreso", level: 4 },
+      { code: "4.1.02.02", name: "Servicios Exentos", type: "ingreso", level: 4 },
+      
+      { code: "4.2", name: "OTROS INGRESOS", type: "ingreso", level: 2 },
+      { code: "4.2.01", name: "Ingresos Financieros", type: "ingreso", level: 3 },
+      { code: "4.2.02", name: "Utilidad en Venta de Activos", type: "ingreso", level: 3 },
+      { code: "4.2.03", name: "Otros Ingresos No Operacionales", type: "ingreso", level: 3 },
+      
+      // COSTOS Y GASTOS
+      { code: "5", name: "COSTOS Y GASTOS", type: "gasto", level: 1 },
+      { code: "5.1", name: "COSTO DE VENTAS", type: "gasto", level: 2 },
+      { code: "5.1.01", name: "COSTO DE VENTAS Y SERVICIOS", type: "gasto", level: 3 },
+      { code: "5.1.01.01", name: "Costo de Ventas", type: "gasto", level: 4 },
+      { code: "5.1.01.02", name: "Costo de Servicios", type: "gasto", level: 4 },
+      
+      { code: "5.2", name: "GASTOS OPERACIONALES", type: "gasto", level: 2 },
+      { code: "5.2.01", name: "GASTOS ADMINISTRATIVOS", type: "gasto", level: 3 },
+      { code: "5.2.01.01", name: "Sueldos y Salarios", type: "gasto", level: 4 },
+      { code: "5.2.01.02", name: "Beneficios Sociales", type: "gasto", level: 4 },
+      { code: "5.2.01.03", name: "Aporte Patronal IESS", type: "gasto", level: 4 },
+      { code: "5.2.01.04", name: "Servicios Básicos", type: "gasto", level: 4 },
+      { code: "5.2.01.05", name: "Arriendo", type: "gasto", level: 4 },
+      { code: "5.2.01.06", name: "Suministros de Oficina", type: "gasto", level: 4 },
+      { code: "5.2.01.07", name: "Depreciación de Activos Fijos", type: "gasto", level: 4 },
+      { code: "5.2.01.08", name: "Mantenimiento y Reparación", type: "gasto", level: 4 },
+      { code: "5.2.01.09", name: "Combustible", type: "gasto", level: 4 },
+      { code: "5.2.01.10", name: "Seguros", type: "gasto", level: 4 },
+      { code: "5.2.01.11", name: "Honorarios Profesionales", type: "gasto", level: 4 },
+      
+      { code: "5.2.02", name: "GASTOS DE VENTAS", type: "gasto", level: 3 },
+      { code: "5.2.02.01", name: "Publicidad", type: "gasto", level: 4 },
+      { code: "5.2.02.02", name: "Comisiones en Ventas", type: "gasto", level: 4 },
+      { code: "5.2.02.03", name: "Transporte y Fletes", type: "gasto", level: 4 },
+      
+      { code: "5.3", name: "GASTOS FINANCIEROS", type: "gasto", level: 2 },
+      { code: "5.3.01", name: "Intereses Bancarios", type: "gasto", level: 3 },
+      { code: "5.3.02", name: "Comisiones Bancarias", type: "gasto", level: 3 },
+      { code: "5.3.03", name: "Pérdida en Cambio", type: "gasto", level: 3 },
+      
+      { code: "5.4", name: "OTROS GASTOS", type: "gasto", level: 2 },
+      { code: "5.4.01", name: "Gastos No Deducibles", type: "gasto", level: 3 },
+      { code: "5.4.02", name: "Pérdida en Venta de Activos", type: "gasto", level: 3 },
       { code: "2.01.02.002", name: "Retención Fuente por Pagar", type: "pasivo", level: 4 },
       { code: "2.01.02.003", name: "Retención IVA por Pagar", type: "pasivo", level: 4 },
       { code: "2.01.02.004", name: "IESS por Pagar", type: "pasivo", level: 4 },

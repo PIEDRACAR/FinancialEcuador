@@ -318,6 +318,7 @@ export default function ImportAccountingPage() {
                       </Button>
                       
                       <ImportDropdown
+                        type={template.type}
                         onFileSelect={(file) => handleFileImport(file, template.type)}
                         acceptedTypes=".csv,.xlsx,.xls"
                         disabled={isUploading}

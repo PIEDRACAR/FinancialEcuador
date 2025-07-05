@@ -60,13 +60,13 @@ export function CreateRetentionModal({ open, onOpenChange }: CreateRetentionModa
 
   const retentionRates = {
     fuente: [
-      { code: "303", name: "Honorarios profesionales", rate: "8.00" },
+      { code: "303", name: "Honorarios profesionales", rate: "10.00" },
       { code: "304", name: "Servicios predomina intelecto", rate: "8.00" },
       { code: "307", name: "Servicios predomina mano obra", rate: "2.00" },
-      { code: "310", name: "Arrendamiento inmuebles", rate: "8.00" },
+      { code: "310", name: "Arrendamiento inmuebles", rate: "10.00" },
       { code: "312", name: "Transporte privado", rate: "1.00" },
       { code: "319", name: "Otros servicios", rate: "2.00" },
-      { code: "320", name: "Transferencia bienes muebles", rate: "1.00" },
+      { code: "320", name: "Transferencia bienes muebles", rate: "1.75" },
     ],
     iva: [
       { code: "725", name: "Retención 30% IVA", rate: "30.00" },
