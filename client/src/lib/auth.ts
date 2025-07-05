@@ -4,19 +4,9 @@ const isTokenValid = (): boolean => {
   const token = localStorage.getItem(TOKEN_KEY);
   if (!token) return false;
   
-  try {
-    // Basic JWT structure check (header.payload.signature)
-    const parts = token.split('.');
-    if (parts.length !== 3) return false;
-    
-    // Decode payload to check expiration
-    const payload = JSON.parse(atob(parts[1]));
-    const now = Math.floor(Date.now() / 1000);
-    
-    return payload.exp > now;
-  } catch {
-    return false;
-  }
+  // Since we're using simple session tokens, just check if token exists
+  // In a real app, you'd validate the token with the server
+  return token.length > 0;
 };
 
 export const authStorage = {

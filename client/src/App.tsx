@@ -116,21 +116,6 @@ function Router() {
           <SRIPage />
         </DashboardWrapper>
       </Route>
-      <Route path="/dashboard/suppliers">
-        <DashboardWrapper>
-          <SuppliersPage />
-        </DashboardWrapper>
-      </Route>
-      <Route path="/dashboard/products">
-        <DashboardWrapper>
-          <ProductsPage />
-        </DashboardWrapper>
-      </Route>
-      <Route path="/dashboard/purchases">
-        <DashboardWrapper>
-          <PurchasesPage />
-        </DashboardWrapper>
-      </Route>
       <Route path="/dashboard/import-purchases">
         <DashboardWrapper>
           <ImportPurchasesPage />
@@ -164,21 +149,6 @@ function Router() {
       <Route path="/dashboard/balance-sheet">
         <DashboardWrapper>
           <BalanceSheetPage />
-        </DashboardWrapper>
-      </Route>
-      <Route path="/dashboard/suppliers">
-        <DashboardWrapper>
-          <SuppliersPage />
-        </DashboardWrapper>
-      </Route>
-      <Route path="/dashboard/purchases">
-        <DashboardWrapper>
-          <PurchasesPage />
-        </DashboardWrapper>
-      </Route>
-      <Route path="/dashboard/products">
-        <DashboardWrapper>
-          <ProductsPage />
         </DashboardWrapper>
       </Route>
       <Route path="/dashboard/settings">
