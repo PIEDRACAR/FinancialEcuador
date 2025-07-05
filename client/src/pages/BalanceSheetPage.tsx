@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { BarChart3, Download, Printer, Calendar } from "lucide-react";
+import { ExportDropdown } from "@/components/ExportDropdown";
 
 export default function BalanceSheetPage() {
   const balanceData = {
@@ -51,10 +52,19 @@ export default function BalanceSheetPage() {
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row gap-4 justify-between">
           <div className="flex gap-2">
-            <Button>
-              <Download className="w-4 h-4 mr-2" />
-              Exportar PDF
-            </Button>
+            <ExportDropdown
+              data={[
+                ...balanceData.activos.corrientes.map(item => ({...item, tipo: 'Activo Corriente'})),
+                ...balanceData.activos.noCorrientes.map(item => ({...item, tipo: 'Activo No Corriente'})),
+                ...balanceData.pasivos.corrientes.map(item => ({...item, tipo: 'Pasivo Corriente'})),
+                ...balanceData.pasivos.noCorrientes.map(item => ({...item, tipo: 'Pasivo No Corriente'})),
+                ...balanceData.patrimonio.map(item => ({...item, tipo: 'Patrimonio'}))
+              ]}
+              filename="balance_general"
+              title="Balance General"
+              subtitle="Estado de Situación Financiera"
+              headers={['Tipo', 'Cuenta', 'Monto']}
+            />
             <Button variant="outline">
               <Printer className="w-4 h-4 mr-2" />
               Imprimir
