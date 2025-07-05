@@ -34,6 +34,7 @@ import BalanceSheetPage from "@/pages/BalanceSheetPage";
 import SRIReportsPage from "@/pages/SRIReportsPage";
 import SRIDeclarationsPage from "@/pages/SRIDeclarationsPage";
 import ImportAccountingPage from "@/pages/ImportAccountingPage";
+import SRIImportPage from "@/pages/SRIImportPage";
 import NotFound from "@/pages/not-found";
 
 // Wrapper component for all dashboard routes
@@ -181,7 +182,7 @@ function Router() {
       </Route>
       <Route path="/dashboard/import-sri">
         <DashboardWrapper>
-          <ImportAccountingPage />
+          <SRIImportPage />
         </DashboardWrapper>
       </Route>
       <Route path="/">
