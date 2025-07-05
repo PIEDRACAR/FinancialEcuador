@@ -11,6 +11,7 @@ import { z } from "zod";
 import { sriService } from "./services/sriService";
 import { securityService } from "./services/securityService";
 import { performanceService } from "./services/performanceService";
+import { SRIService } from "./sri-service";
 
 interface AuthenticatedRequest extends Request {
   userId: number;
@@ -147,6 +148,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(404).json({ message: "Usuario no encontrado" });
     }
     res.json({ id: user.id, name: user.name, email: user.email });
+  });
+
+  // SRI RUC Consultation Route
+  app.get("/api/sri/ruc/:ruc", async (req, res) => {
+    const startTime = performance.now();
+    
+    try {
+      const { ruc } = req.params;
+      
+      if (!ruc || ruc.length !== 13) {
+        return res.status(400).json({ 
+          error: "RUC debe tener 13 dígitos" 
+        });
+      }
+
+      console.log(`[API] Consultando RUC: ${ruc}`);
+      const sriData = await SRIService.consultarRUC(ruc);
+      
+      if (!sriData) {
+        return res.status(404).json({ 
+          error: "RUC no encontrado o inválido" 
+        });
+      }
+
+      const endTime = performance.now();
+      console.log(`[API] Consulta RUC completada en ${endTime - startTime}ms`);
+      
+      res.json(sriData);
+    } catch (error) {
+      console.error("[API] Error consultando RUC:", error);
+      res.status(500).json({ 
+        error: "Error interno del servidor" 
+      });
+    }
   });
 
   // Company routes

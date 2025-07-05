@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2 } from "lucide-react";
+import { Loader2, Search, Building2, CheckCircle, AlertCircle } from "lucide-react";
 import { insertCompanySchema } from "@shared/schema";
 import { companiesApi } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
@@ -9,6 +9,40 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { useState } from "react";
+
+interface SRICompanyData {
+  ruc: string;
+  razonSocial: string;
+  nombreComercial?: string;
+  tipoContribuyente: string;
+  estado: string;
+  claseContribuyente: string;
+  fechaInicioActividades: string;
+  actividadEconomica: {
+    principal: {
+      codigo: string;
+      descripcion: string;
+    };
+  };
+  direccion: {
+    provincia: string;
+    canton: string;
+    direccionCompleta: string;
+  };
+  obligaciones: {
+    llevarContabilidad: boolean;
+    agenteRetencion: boolean;
+    regimen: string;
+  };
+  representanteLegal?: {
+    nombres: string;
+    apellidos: string;
+  };
+}
 
 interface CreateCompanyModalProps {
   open: boolean;
@@ -18,6 +52,9 @@ interface CreateCompanyModalProps {
 export default function CreateCompanyModal({ open, onOpenChange }: CreateCompanyModalProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [sriData, setSriData] = useState<SRICompanyData | null>(null);
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
 
   const form = useForm({
     resolver: zodResolver(insertCompanySchema.extend({
@@ -29,6 +66,47 @@ export default function CreateCompanyModal({ open, onOpenChange }: CreateCompany
       address: "",
     },
   });
+
+  const handleRucSearch = async (ruc: string) => {
+    if (!ruc || ruc.length !== 13) {
+      setSearchError("RUC debe tener 13 dígitos");
+      return;
+    }
+
+    setIsSearching(true);
+    setSearchError(null);
+    setSriData(null);
+
+    try {
+      const response = await fetch(`/api/sri/ruc/${ruc}`);
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Error consultando RUC");
+      }
+
+      setSriData(data);
+      
+      // Auto-llenar formulario con datos del SRI
+      form.setValue("name", data.razonSocial);
+      form.setValue("ruc", data.ruc);
+      form.setValue("address", data.direccion.direccionCompleta);
+
+      toast({
+        title: "RUC encontrado",
+        description: `Datos de ${data.razonSocial} cargados desde el SRI`,
+      });
+    } catch (error: any) {
+      setSearchError(error.message);
+      toast({
+        title: "Error consultando RUC",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsSearching(false);
+    }
+  };
 
   const createMutation = useMutation({
     mutationFn: companiesApi.create,
