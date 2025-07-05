@@ -68,6 +68,7 @@ export default function CreateCompanyModal({ open, onOpenChange }: CreateCompany
   });
 
   const handleRucSearch = async (ruc: string) => {
+    console.log("handleRucSearch called with RUC:", ruc);
     if (!ruc || ruc.length !== 13) {
       setSearchError("RUC debe tener 13 dígitos");
       return;
@@ -78,8 +79,10 @@ export default function CreateCompanyModal({ open, onOpenChange }: CreateCompany
     setSriData(null);
 
     try {
+      console.log("Fetching SRI data for RUC:", ruc);
       const response = await fetch(`/api/sri/ruc/${ruc}`);
       const data = await response.json();
+      console.log("SRI response:", data);
 
       if (!response.ok) {
         throw new Error(data.error || "Error consultando RUC");
@@ -88,6 +91,12 @@ export default function CreateCompanyModal({ open, onOpenChange }: CreateCompany
       setSriData(data);
       
       // Auto-llenar formulario con datos del SRI
+      console.log("Setting form values:", {
+        name: data.razonSocial,
+        ruc: data.ruc,
+        address: data.direccion.direccionCompleta
+      });
+      
       form.setValue("name", data.razonSocial);
       form.setValue("ruc", data.ruc);
       form.setValue("address", data.direccion.direccionCompleta);
@@ -97,6 +106,7 @@ export default function CreateCompanyModal({ open, onOpenChange }: CreateCompany
         description: `Datos de ${data.razonSocial} cargados desde el SRI`,
       });
     } catch (error: any) {
+      console.error("Error in handleRucSearch:", error);
       setSearchError(error.message);
       toast({
         title: "Error consultando RUC",
@@ -164,7 +174,8 @@ export default function CreateCompanyModal({ open, onOpenChange }: CreateCompany
                           setSriData(null);
                           // Auto-búsqueda cuando se completan 13 dígitos
                           if (e.target.value.length === 13) {
-                            handleRucSearch(e.target.value);
+                            console.log("Auto-triggering search for RUC:", e.target.value);
+                            setTimeout(() => handleRucSearch(e.target.value), 300);
                           }
                         }}
                         className="text-lg"
