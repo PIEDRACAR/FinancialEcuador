@@ -140,7 +140,7 @@ export default function CreateCompanyModal({ open, onOpenChange }: CreateCompany
         <DialogHeader>
           <DialogTitle>Crear Nueva Empresa</DialogTitle>
           <DialogDescription>
-            Ingresa el RUC para sincronizar automáticamente con el SRI, o llena manualmente
+            Ingresa el RUC de 13 dígitos para sincronizar automáticamente con el SRI
           </DialogDescription>
         </DialogHeader>
 
@@ -148,39 +148,26 @@ export default function CreateCompanyModal({ open, onOpenChange }: CreateCompany
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
               control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nombre de la Empresa *</FormLabel>
-                  <FormControl>
-                    <Input 
-                      placeholder="Ej: Mi Empresa S.A." 
-                      {...field}
-                      className={sriData ? "bg-green-50 border-green-200" : ""}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
               name="ruc"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>RUC</FormLabel>
+                  <FormLabel>RUC de la Empresa *</FormLabel>
                   <div className="flex gap-2">
                     <FormControl>
                       <Input 
-                        placeholder="1234567890001" 
+                        placeholder="Ingresa el RUC (13 dígitos)" 
                         {...field} 
                         maxLength={13}
                         onChange={(e) => {
                           field.onChange(e);
                           setSearchError(null);
                           setSriData(null);
+                          // Auto-búsqueda cuando se completan 13 dígitos
+                          if (e.target.value.length === 13) {
+                            handleRucSearch(e.target.value);
+                          }
                         }}
+                        className="text-lg"
                       />
                     </FormControl>
                     <Button
@@ -189,6 +176,7 @@ export default function CreateCompanyModal({ open, onOpenChange }: CreateCompany
                       size="icon"
                       onClick={() => handleRucSearch(field.value)}
                       disabled={isSearching || field.value.length !== 13}
+                      title="Buscar en SRI"
                     >
                       {isSearching ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
@@ -202,6 +190,11 @@ export default function CreateCompanyModal({ open, onOpenChange }: CreateCompany
                     <div className="flex items-center gap-1 text-sm text-destructive">
                       <AlertCircle className="h-3 w-3" />
                       {searchError}
+                    </div>
+                  )}
+                  {field.value.length > 0 && field.value.length < 13 && (
+                    <div className="text-sm text-muted-foreground">
+                      Faltan {13 - field.value.length} dígitos
                     </div>
                   )}
                 </FormItem>
@@ -249,6 +242,24 @@ export default function CreateCompanyModal({ open, onOpenChange }: CreateCompany
                 </CardContent>
               </Card>
             )}
+
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nombre de la Empresa *</FormLabel>
+                  <FormControl>
+                    <Input 
+                      placeholder="Nombre de la empresa" 
+                      {...field}
+                      className={sriData ? "bg-green-50 border-green-200" : ""}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <FormField
               control={form.control}
