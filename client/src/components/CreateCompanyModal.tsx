@@ -148,9 +148,9 @@ export default function CreateCompanyModal({ open, onOpenChange }: CreateCompany
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Crear Nueva Empresa</DialogTitle>
+          <DialogTitle>🏢 Crear Nueva Empresa</DialogTitle>
           <DialogDescription>
-            Ingresa el RUC de 13 dígitos para sincronizar automáticamente con el SRI
+            ✅ PASO 1: Ingresa el RUC de 13 dígitos para sincronizar automáticamente con el SRI
           </DialogDescription>
         </DialogHeader>
 
@@ -161,7 +161,7 @@ export default function CreateCompanyModal({ open, onOpenChange }: CreateCompany
               name="ruc"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>RUC de la Empresa *</FormLabel>
+                  <FormLabel className="text-lg font-bold text-blue-600">🔍 RUC de la Empresa (Primer Campo) *</FormLabel>
                   <div className="flex gap-2">
                     <FormControl>
                       <Input 
