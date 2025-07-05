@@ -1,10 +1,11 @@
 import { 
-  users, companies, clients, suppliers, products, invoices, purchases, retentions, chartOfAccounts, journalEntries, journalEntryDetails, employees, payrolls, systemSettings,
+  users, companies, clients, suppliers, products, invoices, purchases, retentions, chartOfAccounts, journalEntries, journalEntryDetails, employees, payrolls, systemSettings, proformas,
   type User, type InsertUser, type Company, type InsertCompany, type Client, type InsertClient, type Supplier, type InsertSupplier,
   type Product, type InsertProduct, type Invoice, type InsertInvoice, type Purchase, type InsertPurchase,
   type Retention, type InsertRetention, type ChartOfAccount, type InsertChartOfAccount, 
   type JournalEntry, type InsertJournalEntry, type JournalEntryDetail, type InsertJournalEntryDetail,
   type Employee, type InsertEmployee, type Payroll, type InsertPayroll, type SystemSetting, type InsertSystemSetting,
+  type Proforma, type InsertProforma,
   ECUADOR_TAX_RATES
 } from "@shared/schema";
 
@@ -48,6 +49,13 @@ export interface IStorage {
   createInvoice(invoice: InsertInvoice): Promise<Invoice>;
   updateInvoice(id: number, updates: Partial<InsertInvoice>): Promise<Invoice | undefined>;
   deleteInvoice(id: number): Promise<boolean>;
+  
+  // Proformas
+  getProforma(id: number): Promise<Proforma | undefined>;
+  getProformasByCompany(companyId: number): Promise<Proforma[]>;
+  createProforma(proforma: InsertProforma): Promise<Proforma>;
+  updateProforma(id: number, updates: Partial<InsertProforma>): Promise<Proforma | undefined>;
+  deleteProforma(id: number): Promise<boolean>;
   
   // Purchases
   getPurchase(id: number): Promise<Purchase | undefined>;
@@ -112,6 +120,7 @@ export class MemStorage implements IStorage {
   private suppliers: Map<number, Supplier>;
   private products: Map<number, Product>;
   private invoices: Map<number, Invoice>;
+  private proformas: Map<number, Proforma>;
   private purchases: Map<number, Purchase>;
   private retentions: Map<number, Retention>;
   private chartOfAccounts: Map<number, ChartOfAccount>;

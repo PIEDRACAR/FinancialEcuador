@@ -90,6 +90,25 @@ export const invoices = pgTable("invoices", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// Tabla para Proformas (Cotizaciones)
+export const proformas = pgTable("proformas", {
+  id: serial("id").primaryKey(),
+  number: text("number").notNull(),
+  date: timestamp("date").notNull(),
+  validUntil: timestamp("valid_until").notNull(),
+  subtotal: decimal("subtotal", { precision: 10, scale: 2 }).notNull().default("0"),
+  iva: decimal("iva", { precision: 10, scale: 2 }).notNull().default("0"),
+  ivaRate: decimal("iva_rate", { precision: 5, scale: 2 }).notNull().default("15.00"),
+  total: decimal("total", { precision: 10, scale: 2 }).notNull(),
+  status: text("status").notNull().default("pendiente"), // pendiente, aceptada, rechazada, vencida
+  items: text("items").default("[]"),
+  notes: text("notes").default(""),
+  termsConditions: text("terms_conditions").default(""),
+  clientId: integer("client_id").references(() => clients.id).notNull(),
+  companyId: integer("company_id").references(() => companies.id).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 // Tabla para Compras
 export const purchases = pgTable("purchases", {
   id: serial("id").primaryKey(),
@@ -249,6 +268,11 @@ export const insertInvoiceSchema = createInsertSchema(invoices).omit({
   createdAt: true,
 });
 
+export const insertProformaSchema = createInsertSchema(proformas).omit({
+  id: true,
+  createdAt: true,
+});
+
 export const insertPurchaseSchema = createInsertSchema(purchases).omit({
   id: true,
   createdAt: true,
@@ -315,6 +339,8 @@ export type Product = typeof products.$inferSelect;
 export type InsertProduct = z.infer<typeof insertProductSchema>;
 export type Invoice = typeof invoices.$inferSelect;
 export type InsertInvoice = z.infer<typeof insertInvoiceSchema>;
+export type Proforma = typeof proformas.$inferSelect;
+export type InsertProforma = z.infer<typeof insertProformaSchema>;
 export type Purchase = typeof purchases.$inferSelect;
 export type InsertPurchase = z.infer<typeof insertPurchaseSchema>;
 export type Retention = typeof retentions.$inferSelect;
@@ -334,7 +360,7 @@ export type InsertSystemSetting = z.infer<typeof insertSystemSettingSchema>;
 export type LoginData = z.infer<typeof loginSchema>;
 export type RegisterData = z.infer<typeof registerSchema>;
 
-// Constantes para tasas impositivas Ecuador 2024
+// Constantes para tasas impositivas Ecuador 2024 - Actualizadas según normativa vigente
 export const ECUADOR_TAX_RATES = {
   IVA: {
     GENERAL: 15.0,
@@ -346,17 +372,34 @@ export const ECUADOR_TAX_RATES = {
       BIENES: 1.0,
       SERVICIOS: 2.0,
       ARRENDAMIENTOS: 8.0,
-      HONORARIOS: 10.0
+      HONORARIOS: 10.0,
+      TRANSPORTE: 1.0,
+      COMBUSTIBLES: 0.3,
+      SEGUROS: 1.0,
+      RENDIMIENTOS_FINANCIEROS: 2.0,
+      OTROS_SERVICIOS: 2.0
     },
     IVA: {
       BIENES: 30.0,
-      SERVICIOS: 70.0
+      SERVICIOS: 70.0,
+      SERVICIOS_PROFESIONALES: 100.0
     }
   },
   ICE: {
     VEHICULOS_MIN: 5.0,
     VEHICULOS_MAX: 35.0,
     BEBIDAS_AZUCARADAS: 20.0,
-    CIGARRILLOS: 50.0
+    CIGARRILLOS: 50.0,
+    ALCOHOL: 75.0,
+    PERFUMES: 20.0
+  },
+  NOMINA: {
+    IESS_EMPLEADO: 9.45,
+    IESS_EMPLEADOR: 12.15,
+    IESS_TOTAL: 21.60,
+    FONDOS_RESERVA: 8.33,
+    DECIMO_TERCERO: 8.33,
+    DECIMO_CUARTO: 400.00, // Salario mínimo vital
+    VACACIONES: 4.17
   }
 };

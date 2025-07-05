@@ -5,7 +5,7 @@ import {
   loginSchema, registerSchema, insertCompanySchema, insertClientSchema, insertInvoiceSchema,
   insertSupplierSchema, insertProductSchema, insertPurchaseSchema, insertRetentionSchema,
   insertChartOfAccountSchema, insertJournalEntrySchema, insertJournalEntryDetailSchema,
-  insertEmployeeSchema, insertPayrollSchema, ECUADOR_TAX_RATES
+  insertEmployeeSchema, insertPayrollSchema, insertProformaSchema, ECUADOR_TAX_RATES
 } from "@shared/schema";
 import { z } from "zod";
 
@@ -683,6 +683,206 @@ export async function registerRoutes(app: Express): Promise<Server> {
       balanceSheet,
       totalEntries: journalEntries.length
     });
+  });
+
+  // Import/Export routes for all modules
+  app.post("/api/import/:type", requireAuth, async (req, res) => {
+    try {
+      const { type } = req.params;
+      const { data, companyId } = req.body;
+
+      if (!companyId) {
+        return res.status(400).json({ message: "Company ID es requerido" });
+      }
+
+      let imported = 0;
+      let errors = 0;
+
+      switch (type) {
+        case 'clients':
+          for (const item of data) {
+            try {
+              await storage.createClient({
+                name: item.Nombre,
+                ruc: item.RUC,
+                email: item.Email,
+                phone: item.Teléfono,
+                address: item.Dirección,
+                companyId: companyId
+              });
+              imported++;
+            } catch (error) {
+              errors++;
+            }
+          }
+          break;
+
+        case 'suppliers':
+          for (const item of data) {
+            try {
+              await storage.createSupplier({
+                name: item.Nombre,
+                ruc: item.RUC,
+                email: item.Email,
+                phone: item.Teléfono,
+                address: item.Dirección,
+                contactPerson: item['Persona Contacto'],
+                category: item.Categoría,
+                paymentTerms: item['Términos Pago'],
+                companyId: companyId
+              });
+              imported++;
+            } catch (error) {
+              errors++;
+            }
+          }
+          break;
+
+        case 'products':
+          for (const item of data) {
+            try {
+              await storage.createProduct({
+                code: item.Código,
+                name: item.Nombre,
+                description: item.Descripción,
+                category: item.Categoría,
+                unit: item.Unidad,
+                purchasePrice: item['Precio Compra'],
+                salePrice: item['Precio Venta'],
+                ivaRate: item['IVA %'],
+                stock: parseInt(item.Stock) || 0,
+                minStock: parseInt(item['Stock Mínimo']) || 0,
+                companyId: companyId
+              });
+              imported++;
+            } catch (error) {
+              errors++;
+            }
+          }
+          break;
+
+        case 'employees':
+          for (const item of data) {
+            try {
+              await storage.createEmployee({
+                firstName: item.Nombres,
+                lastName: item.Apellidos,
+                cedula: item.Cédula,
+                email: item.Email,
+                phone: item.Teléfono,
+                position: item.Cargo,
+                department: item.Departamento,
+                salary: item.Salario,
+                startDate: new Date(item['Fecha Ingreso']),
+                companyId: companyId
+              });
+              imported++;
+            } catch (error) {
+              errors++;
+            }
+          }
+          break;
+
+        default:
+          return res.status(400).json({ message: "Tipo de importación no soportado" });
+      }
+
+      res.json({
+        success: true,
+        imported,
+        errors,
+        message: `Importación completada: ${imported} registros importados, ${errors} errores`
+      });
+
+    } catch (error) {
+      res.status(500).json({ message: "Error en importación", error: error instanceof Error ? error.message : "Error desconocido" });
+    }
+  });
+
+  // Export routes for all modules  
+  app.get("/api/export/:type", requireAuth, async (req, res) => {
+    try {
+      const { type } = req.params;
+      const companyId = parseInt(req.query.companyId as string);
+
+      if (!companyId) {
+        return res.status(400).json({ message: "Company ID es requerido" });
+      }
+
+      let data = [];
+      let filename = '';
+      let title = '';
+
+      switch (type) {
+        case 'clients':
+          data = await storage.getClientsByCompany(companyId);
+          filename = 'clientes';
+          title = 'Listado de Clientes';
+          break;
+
+        case 'suppliers':
+          data = await storage.getSuppliersByCompany(companyId);
+          filename = 'proveedores';
+          title = 'Listado de Proveedores';
+          break;
+
+        case 'products':
+          data = await storage.getProductsByCompany(companyId);
+          filename = 'productos';
+          title = 'Listado de Productos';
+          break;
+
+        case 'purchases':
+          data = await storage.getPurchasesByCompany(companyId);
+          filename = 'compras';
+          title = 'Listado de Compras';
+          break;
+
+        case 'invoices':
+          data = await storage.getInvoicesByCompany(companyId);
+          filename = 'facturas';
+          title = 'Listado de Facturas';
+          break;
+
+        case 'employees':
+          data = await storage.getEmployeesByCompany(companyId);
+          filename = 'empleados';
+          title = 'Listado de Empleados';
+          break;
+
+        case 'retentions':
+          data = await storage.getRetentionsByCompany(companyId);
+          filename = 'retenciones';
+          title = 'Listado de Retenciones';
+          break;
+
+        case 'chart-accounts':
+          data = await storage.getChartOfAccountsByCompany(companyId);
+          filename = 'plan_cuentas';
+          title = 'Plan de Cuentas';
+          break;
+
+        case 'journal-entries':
+          data = await storage.getJournalEntriesByCompany(companyId);
+          filename = 'libro_diario';
+          title = 'Libro Diario';
+          break;
+
+        default:
+          return res.status(400).json({ message: "Tipo de exportación no soportado" });
+      }
+
+      res.json({
+        success: true,
+        data,
+        filename,
+        title,
+        total: data.length
+      });
+
+    } catch (error) {
+      res.status(500).json({ message: "Error en exportación", error: error instanceof Error ? error.message : "Error desconocido" });
+    }
   });
 
   const httpServer = createServer(app);
