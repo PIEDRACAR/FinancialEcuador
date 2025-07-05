@@ -73,6 +73,7 @@ export default function Sidebar() {
       icon: FileText, 
       label: "Reportes", 
       children: [
+        { icon: FileText, label: "Estados Financieros", path: "/dashboard/financial-statements" },
         { icon: FileText, label: "Balance General", path: "/dashboard/balance-sheet" },
         { icon: FileText, label: "Estado de Resultados", path: "/dashboard/income-statement" },
         { icon: FileText, label: "Flujo de Caja", path: "/dashboard/cash-flow" },

@@ -1,103 +1,193 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Plus, Search, ShoppingCart } from "lucide-react";
+import { useCompany } from "@/contexts/CompanyContext";
+import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import DashboardLayout from "@/components/DashboardLayout";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { ShoppingCart, Plus, Search, Edit, Trash2, Upload, Download, FileText } from "lucide-react";
 
 export default function PurchasesPage() {
+  const { selectedCompany } = useCompany();
   const [searchTerm, setSearchTerm] = useState("");
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
 
-  const { data: purchases = [], isLoading } = useQuery({
-    queryKey: ["purchases"],
-    queryFn: async () => {
-      const response = await fetch("/api/purchases", {
-        headers: {
-          "Authorization": `Bearer ${localStorage.getItem("token")}`,
-        }
-      });
-      if (!response.ok) throw new Error("Error al cargar compras");
-      return response.json();
+  // Sample purchases data
+  const purchases = [
+    {
+      id: 1,
+      number: "COMP-001",
+      date: "2024-12-01",
+      supplier: "Proveedor ABC S.A.",
+      subtotal: 850.00,
+      iva: 127.50,
+      total: 977.50,
+      status: "Pagada",
+      retention: 25.50
     },
-  });
+    {
+      id: 2,
+      number: "COMP-002",
+      date: "2024-12-02",
+      supplier: "Distribuidora XYZ",
+      subtotal: 1200.00,
+      iva: 180.00,
+      total: 1380.00,
+      status: "Pendiente",
+      retention: 36.00
+    },
+    {
+      id: 3,
+      number: "COMP-003",
+      date: "2024-12-03",
+      supplier: "Servicios Técnicos Ltda.",
+      subtotal: 450.00,
+      iva: 67.50,
+      total: 517.50,
+      status: "Autorizada",
+      retention: 13.50
+    }
+  ];
 
-  const filteredPurchases = purchases.filter((purchase: any) =>
-    purchase.number.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredPurchases = purchases.filter(purchase =>
+    purchase.number.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    purchase.supplier.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
-    <DashboardLayout title="Gestión de Compras" subtitle="Registra y controla todas tus compras con retenciones automáticas">
+    <DashboardLayout title="Compras" subtitle="Gestiona las facturas de compra y órdenes de compra">
       <div className="space-y-6">
-        {/* Header */}
-        <div className="flex justify-between items-center">
-          <Button className="bg-blue-600 hover:bg-blue-700">
-            <Plus className="w-4 h-4 mr-2" />
-            Nueva Compra
-          </Button>
+        {/* Header Actions */}
+        <div className="flex flex-col sm:flex-row gap-4 justify-between">
+          <div className="flex gap-2">
+            <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+              <DialogTrigger asChild>
+                <Button>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Nueva Compra
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-3xl">
+                <DialogHeader>
+                  <DialogTitle>Registrar Nueva Compra</DialogTitle>
+                </DialogHeader>
+                <form className="space-y-4">
+                  <div className="grid grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="number">Número de Factura</Label>
+                      <Input id="number" placeholder="001-001-000000001" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="date">Fecha</Label>
+                      <Input id="date" type="date" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="supplier">Proveedor</Label>
+                      <Input id="supplier" placeholder="Seleccionar proveedor" />
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="description">Descripción</Label>
+                    <Textarea id="description" placeholder="Descripción de la compra" />
+                  </div>
+                  
+                  <div className="grid grid-cols-4 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="subtotal">Subtotal</Label>
+                      <Input id="subtotal" type="number" step="0.01" placeholder="0.00" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="iva">IVA (15%)</Label>
+                      <Input id="iva" type="number" step="0.01" placeholder="0.00" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="retention">Retención</Label>
+                      <Input id="retention" type="number" step="0.01" placeholder="0.00" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="total">Total</Label>
+                      <Input id="total" type="number" step="0.01" placeholder="0.00" />
+                    </div>
+                  </div>
+                  
+                  <div className="flex gap-2 justify-end">
+                    <Button type="button" variant="outline" onClick={() => setShowCreateDialog(false)}>
+                      Cancelar
+                    </Button>
+                    <Button type="submit">
+                      Registrar Compra
+                    </Button>
+                  </div>
+                </form>
+              </DialogContent>
+            </Dialog>
+            <Button variant="outline">
+              <Upload className="w-4 h-4 mr-2" />
+              Importar
+            </Button>
+            <Button variant="outline">
+              <Download className="w-4 h-4 mr-2" />
+              Exportar
+            </Button>
+          </div>
+          <div className="flex gap-2">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Input
+                placeholder="Buscar compras..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+          </div>
         </div>
 
-        {/* Search and Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card className="md:col-span-1">
-            <CardContent className="p-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                <Input
-                  placeholder="Buscar compras..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
+        {/* Statistics Cards */}
+        <div className="grid gap-4 md:grid-cols-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Compras</CardTitle>
+              <ShoppingCart className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">$2,875.00</div>
+              <p className="text-xs text-muted-foreground">Este mes</p>
             </CardContent>
           </Card>
-          
           <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center space-x-2">
-                <ShoppingCart className="h-5 w-5 text-blue-600" />
-                <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-300">
-                    Total Compras
-                  </p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {purchases.length}
-                  </p>
-                </div>
-              </div>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Retenciones</CardTitle>
+              <FileText className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">$75.00</div>
+              <p className="text-xs text-muted-foreground">Retenido</p>
             </CardContent>
           </Card>
-
           <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center space-x-2">
-                <ShoppingCart className="h-5 w-5 text-green-600" />
-                <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-300">
-                    Valor Total
-                  </p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                    $0.00
-                  </p>
-                </div>
-              </div>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Compras Pendientes</CardTitle>
+              <ShoppingCart className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">1</div>
+              <p className="text-xs text-muted-foreground">Por autorizar</p>
             </CardContent>
           </Card>
-
           <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center space-x-2">
-                <ShoppingCart className="h-5 w-5 text-yellow-600" />
-                <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-300">
-                    Retenciones
-                  </p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                    $0.00
-                  </p>
-                </div>
-              </div>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Proveedores</CardTitle>
+              <ShoppingCart className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">3</div>
+              <p className="text-xs text-muted-foreground">Activos</p>
             </CardContent>
           </Card>
         </div>
@@ -105,84 +195,61 @@ export default function PurchasesPage() {
         {/* Purchases Table */}
         <Card>
           <CardHeader>
-            <CardTitle>Registro de Compras</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <ShoppingCart className="w-5 h-5" />
+              Registro de Compras
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            {isLoading ? (
-              <div className="text-center py-8">
-                <div className="animate-pulse">
-                  <div className="h-4 bg-gray-200 rounded w-1/4 mx-auto mb-4"></div>
-                  <div className="h-4 bg-gray-200 rounded w-1/2 mx-auto"></div>
-                </div>
-              </div>
-            ) : filteredPurchases.length === 0 ? (
-              <div className="text-center py-8">
-                <ShoppingCart className="mx-auto h-12 w-12 text-gray-400" />
-                <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">
-                  No hay compras registradas
-                </h3>
-                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                  Comienza registrando tu primera compra.
-                </p>
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b">
-                      <th className="text-left py-3 px-4 font-medium text-gray-900 dark:text-white">
-                        Número
-                      </th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-900 dark:text-white">
-                        Fecha
-                      </th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-900 dark:text-white">
-                        Subtotal
-                      </th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-900 dark:text-white">
-                        IVA
-                      </th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-900 dark:text-white">
-                        Total
-                      </th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-900 dark:text-white">
-                        Estado
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredPurchases.map((purchase: any) => (
-                      <tr key={purchase.id} className="border-b hover:bg-gray-50 dark:hover:bg-gray-800">
-                        <td className="py-3 px-4 text-sm text-gray-900 dark:text-white">
-                          {purchase.number}
-                        </td>
-                        <td className="py-3 px-4 text-sm text-gray-900 dark:text-white">
-                          {new Date(purchase.date).toLocaleDateString()}
-                        </td>
-                        <td className="py-3 px-4 text-sm text-gray-900 dark:text-white">
-                          ${parseFloat(purchase.subtotal || 0).toFixed(2)}
-                        </td>
-                        <td className="py-3 px-4 text-sm text-gray-900 dark:text-white">
-                          ${parseFloat(purchase.iva || 0).toFixed(2)}
-                        </td>
-                        <td className="py-3 px-4 text-sm font-medium text-gray-900 dark:text-white">
-                          ${parseFloat(purchase.total || 0).toFixed(2)}
-                        </td>
-                        <td className="py-3 px-4">
-                          <span className={`px-2 py-1 rounded text-xs ${
-                            purchase.status === "PAGADO" 
-                              ? 'bg-green-100 text-green-800' 
-                              : 'bg-yellow-100 text-yellow-800'
-                          }`}>
-                            {purchase.status || "PENDIENTE"}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Número</TableHead>
+                  <TableHead>Fecha</TableHead>
+                  <TableHead>Proveedor</TableHead>
+                  <TableHead>Subtotal</TableHead>
+                  <TableHead>IVA</TableHead>
+                  <TableHead>Retención</TableHead>
+                  <TableHead>Total</TableHead>
+                  <TableHead>Estado</TableHead>
+                  <TableHead>Acciones</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredPurchases.map((purchase) => (
+                  <TableRow key={purchase.id}>
+                    <TableCell className="font-medium">{purchase.number}</TableCell>
+                    <TableCell>{purchase.date}</TableCell>
+                    <TableCell>{purchase.supplier}</TableCell>
+                    <TableCell>${purchase.subtotal.toFixed(2)}</TableCell>
+                    <TableCell>${purchase.iva.toFixed(2)}</TableCell>
+                    <TableCell>${purchase.retention.toFixed(2)}</TableCell>
+                    <TableCell className="font-medium">${purchase.total.toFixed(2)}</TableCell>
+                    <TableCell>
+                      <Badge variant={
+                        purchase.status === "Pagada" ? "default" :
+                        purchase.status === "Pendiente" ? "secondary" : "outline"
+                      }>
+                        {purchase.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-2">
+                        <Button size="sm" variant="outline">
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button size="sm" variant="outline">
+                          <FileText className="w-4 h-4" />
+                        </Button>
+                        <Button size="sm" variant="outline">
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </CardContent>
         </Card>
       </div>

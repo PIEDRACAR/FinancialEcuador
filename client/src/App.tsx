@@ -24,6 +24,13 @@ import SettingsPage from "@/components/SettingsPage";
 import SuppliersPage from "@/pages/SuppliersPage";
 import ProductsPage from "@/pages/ProductsPage";
 import PurchasesPage from "@/pages/PurchasesPage";
+import ImportPurchasesPage from "@/pages/ImportPurchasesPage";
+import FinancialStatementsPage from "@/pages/FinancialStatementsPage";
+import ElectronicInvoicingPage from "@/pages/ElectronicInvoicingPage";
+import ChartAccountsPage from "@/pages/ChartAccountsPage";
+import JournalEntriesPage from "@/pages/JournalEntriesPage";
+import LedgerPage from "@/pages/LedgerPage";
+import BalanceSheetPage from "@/pages/BalanceSheetPage";
 import NotFound from "@/pages/not-found";
 
 // Wrapper component for all dashboard routes
@@ -122,6 +129,41 @@ function Router() {
       <Route path="/dashboard/purchases">
         <DashboardWrapper>
           <PurchasesPage />
+        </DashboardWrapper>
+      </Route>
+      <Route path="/dashboard/import-purchases">
+        <DashboardWrapper>
+          <ImportPurchasesPage />
+        </DashboardWrapper>
+      </Route>
+      <Route path="/dashboard/financial-statements">
+        <DashboardWrapper>
+          <FinancialStatementsPage />
+        </DashboardWrapper>
+      </Route>
+      <Route path="/dashboard/electronic-invoicing">
+        <DashboardWrapper>
+          <ElectronicInvoicingPage />
+        </DashboardWrapper>
+      </Route>
+      <Route path="/dashboard/chart-accounts">
+        <DashboardWrapper>
+          <ChartAccountsPage />
+        </DashboardWrapper>
+      </Route>
+      <Route path="/dashboard/journal-entries">
+        <DashboardWrapper>
+          <JournalEntriesPage />
+        </DashboardWrapper>
+      </Route>
+      <Route path="/dashboard/ledger">
+        <DashboardWrapper>
+          <LedgerPage />
+        </DashboardWrapper>
+      </Route>
+      <Route path="/dashboard/balance-sheet">
+        <DashboardWrapper>
+          <BalanceSheetPage />
         </DashboardWrapper>
       </Route>
       <Route path="/dashboard/settings">

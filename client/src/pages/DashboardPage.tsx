@@ -274,26 +274,42 @@ export default function DashboardPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="grid gap-2">
-              <Link href="/invoices">
+              <Link href="/dashboard/invoices">
                 <Button className="justify-start w-full" variant="outline">
                   <FileText className="mr-2 h-4 w-4" />
                   Nueva Factura
                 </Button>
               </Link>
-              <Link href="/clients">
+              <Link href="/dashboard/clients">
                 <Button className="justify-start w-full" variant="outline">
                   <UserPlus className="mr-2 h-4 w-4" />
                   Agregar Cliente
                 </Button>
               </Link>
-              <Button className="justify-start w-full" variant="outline">
-                <Building2 className="mr-2 h-4 w-4" />
-                Configurar Empresa
-              </Button>
-              <Button className="justify-start w-full" variant="outline">
-                <DollarSign className="mr-2 h-4 w-4" />
-                Ver Reportes
-              </Button>
+              <Link href="/dashboard/settings">
+                <Button className="justify-start w-full" variant="outline">
+                  <Building2 className="mr-2 h-4 w-4" />
+                  Configurar Empresa
+                </Button>
+              </Link>
+              <Link href="/dashboard/reports">
+                <Button className="justify-start w-full" variant="outline">
+                  <DollarSign className="mr-2 h-4 w-4" />
+                  Ver Reportes
+                </Button>
+              </Link>
+              <Link href="/dashboard/financial-statements">
+                <Button className="justify-start w-full" variant="outline">
+                  <FileText className="mr-2 h-4 w-4" />
+                  Estados Financieros
+                </Button>
+              </Link>
+              <Link href="/dashboard/electronic-invoicing">
+                <Button className="justify-start w-full" variant="outline">
+                  <FileText className="mr-2 h-4 w-4" />
+                  Facturación Electrónica
+                </Button>
+              </Link>
             </CardContent>
           </Card>
         </div>
