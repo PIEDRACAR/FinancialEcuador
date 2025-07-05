@@ -21,6 +21,9 @@ import EmployeesPage from "@/pages/EmployeesPage";
 import SRIPage from "@/pages/SRIPage";
 import ReportsPage from "@/components/ReportsPage";
 import SettingsPage from "@/components/SettingsPage";
+import SuppliersPage from "@/pages/SuppliersPage";
+import ProductsPage from "@/pages/ProductsPage";
+import PurchasesPage from "@/pages/PurchasesPage";
 import NotFound from "@/pages/not-found";
 
 // Wrapper component for all dashboard routes
@@ -89,6 +92,21 @@ function Router() {
       <Route path="/dashboard/sri">
         <DashboardWrapper>
           <SRIPage />
+        </DashboardWrapper>
+      </Route>
+      <Route path="/dashboard/suppliers">
+        <DashboardWrapper>
+          <SuppliersPage />
+        </DashboardWrapper>
+      </Route>
+      <Route path="/dashboard/products">
+        <DashboardWrapper>
+          <ProductsPage />
+        </DashboardWrapper>
+      </Route>
+      <Route path="/dashboard/purchases">
+        <DashboardWrapper>
+          <PurchasesPage />
         </DashboardWrapper>
       </Route>
       <Route path="/dashboard/settings">
