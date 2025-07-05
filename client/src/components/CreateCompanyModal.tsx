@@ -117,6 +117,8 @@ export default function CreateCompanyModal({ open, onOpenChange }: CreateCompany
         description: `Tu empresa "${form.getValues().name}" ha sido registrada`,
       });
       form.reset();
+      setSriData(null);
+      setSearchError(null);
       onOpenChange(false);
     },
     onError: (error: any) => {
@@ -134,11 +136,11 @@ export default function CreateCompanyModal({ open, onOpenChange }: CreateCompany
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Crear Nueva Empresa</DialogTitle>
           <DialogDescription>
-            Agregue una nueva empresa a su cuenta para comenzar a gestionar su contabilidad
+            Ingresa el RUC para sincronizar automáticamente con el SRI, o llena manualmente
           </DialogDescription>
         </DialogHeader>
 
@@ -151,7 +153,11 @@ export default function CreateCompanyModal({ open, onOpenChange }: CreateCompany
                 <FormItem>
                   <FormLabel>Nombre de la Empresa *</FormLabel>
                   <FormControl>
-                    <Input placeholder="Ej: Mi Empresa S.A." {...field} />
+                    <Input 
+                      placeholder="Ej: Mi Empresa S.A." 
+                      {...field}
+                      className={sriData ? "bg-green-50 border-green-200" : ""}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -164,13 +170,85 @@ export default function CreateCompanyModal({ open, onOpenChange }: CreateCompany
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>RUC</FormLabel>
-                  <FormControl>
-                    <Input placeholder="1234567890001" {...field} />
-                  </FormControl>
+                  <div className="flex gap-2">
+                    <FormControl>
+                      <Input 
+                        placeholder="1234567890001" 
+                        {...field} 
+                        maxLength={13}
+                        onChange={(e) => {
+                          field.onChange(e);
+                          setSearchError(null);
+                          setSriData(null);
+                        }}
+                      />
+                    </FormControl>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      onClick={() => handleRucSearch(field.value)}
+                      disabled={isSearching || field.value.length !== 13}
+                    >
+                      {isSearching ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Search className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
                   <FormMessage />
+                  {searchError && (
+                    <div className="flex items-center gap-1 text-sm text-destructive">
+                      <AlertCircle className="h-3 w-3" />
+                      {searchError}
+                    </div>
+                  )}
                 </FormItem>
               )}
             />
+
+            {/* Datos del SRI */}
+            {sriData && (
+              <Card className="border-green-200 bg-green-50">
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-2 text-green-800 text-sm">
+                    <CheckCircle className="h-4 w-4" />
+                    Datos del SRI Verificados
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2 text-xs">
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <div className="font-medium text-green-800">Estado</div>
+                      <Badge variant={sriData.estado === 'ACTIVO' ? 'default' : 'destructive'} className="text-xs">
+                        {sriData.estado}
+                      </Badge>
+                    </div>
+                    <div>
+                      <div className="font-medium text-green-800">Régimen</div>
+                      <div className="text-green-700">{sriData.obligaciones.regimen}</div>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <div className="font-medium text-green-800">Actividad Económica</div>
+                    <div className="text-green-700 text-xs">
+                      {sriData.actividadEconomica.principal.codigo} - {sriData.actividadEconomica.principal.descripcion}
+                    </div>
+                  </div>
+
+                  <div className="flex gap-1 flex-wrap">
+                    {sriData.obligaciones.llevarContabilidad && (
+                      <Badge variant="outline" className="text-xs">Lleva Contabilidad</Badge>
+                    )}
+                    {sriData.obligaciones.agenteRetencion && (
+                      <Badge variant="outline" className="text-xs">Agente de Retención</Badge>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             <FormField
               control={form.control}
@@ -179,7 +257,11 @@ export default function CreateCompanyModal({ open, onOpenChange }: CreateCompany
                 <FormItem>
                   <FormLabel>Dirección</FormLabel>
                   <FormControl>
-                    <Input placeholder="Dirección de la empresa" {...field} />
+                    <Input 
+                      placeholder="Dirección de la empresa" 
+                      {...field}
+                      className={sriData ? "bg-green-50 border-green-200" : ""}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
