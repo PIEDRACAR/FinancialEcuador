@@ -29,6 +29,12 @@ export interface SRICompanyData {
     llevarContabilidad: boolean;
     agenteRetencion: boolean;
     regimen: string;
+    proximasObligaciones?: Array<{
+      tipo: string;
+      fechaVencimiento: string;
+      diasRestantes: number;
+      descripcion: string;
+    }>;
   };
   representanteLegal?: {
     cedula: string;
@@ -41,6 +47,14 @@ export interface SRICompanyData {
     direccion: string;
     estado: string;
   }>;
+  contacto?: {
+    email?: string;
+    telefono?: string;
+  };
+  matriculacion?: {
+    valorPendiente?: number;
+    fechaVencimiento?: string;
+  };
 }
 
 export class SRIService {
@@ -151,7 +165,9 @@ export class SRIService {
       direccion: this.generarDireccion(ruc),
       obligaciones: this.generarObligaciones(ruc),
       representanteLegal: this.generarRepresentanteLegal(ruc),
-      establecimientos: this.generarEstablecimientos(ruc)
+      establecimientos: this.generarEstablecimientos(ruc),
+      contacto: this.generarContacto(ruc),
+      matriculacion: this.generarMatriculacion(ruc)
     };
 
     return companyData;
@@ -249,10 +265,26 @@ export class SRIService {
   private static generarObligaciones(ruc: string) {
     const tercerDigito = parseInt(ruc.charAt(2));
     
+    const proximasObligaciones = [
+      {
+        tipo: 'DECLARACIÓN IVA',
+        fechaVencimiento: '2024-12-29',
+        diasRestantes: 23,
+        descripcion: 'Declaración mensual del IVA'
+      },
+      {
+        tipo: 'RETENCIONES',
+        fechaVencimiento: '2024-12-29',
+        diasRestantes: 23,
+        descripcion: 'Declaración de retenciones en la fuente'
+      }
+    ];
+    
     return {
       llevarContabilidad: tercerDigito >= 6,
       agenteRetencion: tercerDigito === 9,
-      regimen: tercerDigito >= 6 ? 'GENERAL' : 'SIMPLIFICADO'
+      regimen: tercerDigito >= 6 ? 'GENERAL' : 'SIMPLIFICADO',
+      proximasObligaciones
     };
   }
 
@@ -285,5 +317,28 @@ export class SRIService {
         estado: 'ABIERTO'
       }
     ];
+  }
+
+  private static generarContacto(ruc: string) {
+    // Generar email y teléfono basado en el RUC
+    const empresaNombre = this.generarRazonSocial(ruc).toLowerCase()
+      .replace(/\s+/g, '')
+      .replace(/[^a-z0-9]/g, '')
+      .substring(0, 10);
+    
+    return {
+      email: `contacto@${empresaNombre}.com.ec`,
+      telefono: `09${ruc.substring(2, 10)}`
+    };
+  }
+
+  private static generarMatriculacion(ruc: string) {
+    // Simular valores de matriculación según el tipo de empresa
+    const valorBase = parseInt(ruc.substring(4, 7));
+    
+    return {
+      valorPendiente: valorBase > 500 ? valorBase * 2.5 : 0,
+      fechaVencimiento: valorBase > 500 ? '2024-12-31' : undefined
+    };
   }
 }
