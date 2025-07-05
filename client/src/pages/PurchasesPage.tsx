@@ -14,6 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useCompany } from "@/contexts/CompanyContext";
 import { useToast } from "@/hooks/use-toast";
 import DashboardLayout from "@/components/DashboardLayout";
+import { ExportDropdown } from "@/components/ExportDropdown";
 
 export default function PurchasesPage() {
   const { selectedCompany } = useCompany();
@@ -33,7 +34,7 @@ export default function PurchasesPage() {
       supplier: "Proveedor Tech Solutions S.A.",
       supplierRuc: "1792345678001",
       subtotal: 1000.00,
-      iva: 150.00,
+      iva: 150.00, // 15% IVA Ecuador 2024
       total: 1150.00,
       status: "paid",
       retentionApplied: true,
@@ -91,36 +92,7 @@ export default function PurchasesPage() {
   const totalRetentions = purchases.reduce((sum, p) => sum + p.retentionAmount, 0);
   const pendingPurchases = purchases.filter(p => p.status === 'pending').length;
 
-  const exportPurchases = (format: string) => {
-    const filename = `compras_${new Date().toISOString().split('T')[0]}`;
-    
-    if (format === 'pdf') {
-      // Simular descarga PDF
-      const link = document.createElement('a');
-      link.href = 'data:application/pdf;base64,JVBERi0xLjQKJdPr6eEKMSAwIG9iago8PAovVGl0bGUgKFJlcG9ydGUgZGUgQ29tcHJhcykKL0NyZWF0b3IgKFNpc3RlbWEgQ29udGFibGUgUHJvKQovUHJvZHVjZXIgKFNpc3RlbWEgQ29udGFibGUgUHJvKQovQ3JlYXRpb25EYXRlIChEOjIwMjQxMjMxKQo+PgplbmRvYmoKCjIgMCBvYmoKPDwKL1R5cGUgL0NhdGFsb2cKL1BhZ2VzIDMgMCBSCj4+CmVuZG9iagoKMyAwIG9iago8PAovVHlwZSAvUGFnZXMKL0NvdW50IDEKL0tpZHMgWzQgMCBSXQo+PgplbmRvYmoKCjQgMCBvYmoKPDwKL1R5cGUgL1BhZ2UKL1BhcmVudCAzIDAgUgovTWVkaWFCb3ggWzAgMCA2MTIgNzkyXQo+PgplbmRvYmoKCnhyZWYKMCA1CjAwMDAwMDAwMDAgNjU1MzUgZiAKMDAwMDAwMDAwOSAwMDAwMCBuIAowMDAwMDAwMTc0IDAwMDAwIG4gCjAwMDAwMDAyMjEgMDAwMDAgbiAKMDAwMDAwMDI3OCAwMDAwMCBuIAp0cmFpbGVyCjw8Ci9TaXplIDUKL1Jvb3QgMiAwIFIKPj4Kc3RhcnR4cmVmCjM3OAolJUVPRgo=';
-      link.download = `${filename}.pdf`;
-      link.click();
-      toast({
-        title: "Exportación exitosa",
-        description: `Reporte de compras exportado como ${format.toUpperCase()}`,
-      });
-    } else if (format === 'excel') {
-      // Simular descarga Excel
-      const csvContent = "data:text/csv;charset=utf-8," + 
-        "Número,Fecha,Proveedor,RUC,Subtotal,IVA,Total,Estado,Retención\n" +
-        purchases.map(p => `${p.number},${p.date},${p.supplier},${p.supplierRuc},${p.subtotal},${p.iva},${p.total},${p.status},${p.retentionAmount}`).join('\n');
-      
-      const encodedUri = encodeURI(csvContent);
-      const link = document.createElement('a');
-      link.setAttribute('href', encodedUri);
-      link.setAttribute('download', `${filename}.csv`);
-      link.click();
-      toast({
-        title: "Exportación exitosa",
-        description: `Reporte de compras exportado como ${format.toUpperCase()}`,
-      });
-    }
-  };
+
 
   const handleCreatePurchase = (purchaseData: any) => {
     // Simular creación
@@ -202,14 +174,23 @@ export default function PurchasesPage() {
               <Plus className="mr-2 h-4 w-4" />
               Nueva Compra
             </Button>
-            <Button variant="outline" onClick={() => exportPurchases('pdf')}>
-              <Download className="mr-2 h-4 w-4" />
-              Exportar PDF
-            </Button>
-            <Button variant="outline" onClick={() => exportPurchases('excel')}>
-              <FileText className="mr-2 h-4 w-4" />
-              Exportar Excel
-            </Button>
+            <ExportDropdown
+              data={filteredPurchases.map(p => ({
+                numero: p.number,
+                fecha: p.date,
+                proveedor: p.supplier,
+                ruc: p.supplierRuc,
+                subtotal: p.subtotal,
+                iva: p.iva,
+                total: p.total,
+                estado: p.status,
+                retencion: p.retentionAmount
+              }))}
+              filename="compras"
+              title="Registro de Compras"
+              subtitle="Compras registradas en el sistema - IVA 15% Ecuador 2024"
+              headers={['Número', 'Fecha', 'Proveedor', 'RUC', 'Subtotal', 'IVA', 'Total', 'Estado', 'Retención']}
+            />
             <Button variant="outline">
               <Upload className="mr-2 h-4 w-4" />
               Importar XML
