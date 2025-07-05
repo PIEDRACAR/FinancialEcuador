@@ -1,0 +1,62 @@
+# Comando Actualizado para el Agente de Replit (Normativa Ecuatoriana Vigente)
+
+```markdown
+**Solicitud técnica actualizada para el Agente de Replit:**
+
+1. **Actualización de impuestos (2024):**
+   ```python
+   # Tasas de IVA según SRI (2024)
+   IVA_RATES = {
+       'general': 15.0,    # Bienes y servicios generales
+       'reducido': 5.0,    # Canasta básica, medicinas
+       'cero': 0.0         # Educación, salud pública
+   }
+
+   # Porcentajes de retención actualizados (julio 2024)
+   RETENTIONS = {
+       'renta': {
+           'bienes': 1.0,      # Bienes (1%)
+           'servicios': 2.0,   # Servicios (2%)
+           'alquileres': 8.0   # Arrendamientos (8%)
+       },
+       'iva': {
+           'bienes': 30.0,     # 30% del IVA facturado
+           'servicios': 70.0,  # 70% del IVA facturado
+           'exportaciones': 0.0
+       }
+   }
+   ```
+
+2. **Requisitos adicionales:**
+   - Validar NITs/RUCs con servicio web del SRI
+   - Generar códigos de acceso para comprobantes electrónicos
+   - Implementar tablas de ICE para productos especiales
+   - Cálculo automático de IR según tabla progresiva SRI
+
+3. **Formatos de exportación obligatorios:**
+   ```javascript
+   FORMATOS_EXPORTACION = [
+       'SRI-XML (Facturación Electrónica)',
+       'SRI-JSON (Para APIs)',
+       'Excel (Plantilla estándar SRI)',
+       'PDF/A-3 (Para archivo digital)'
+   ]
+   ```
+
+4. **Módulo de actualizaciones automáticas:**
+   - Conexión con WS del SRI para cambios de tasas
+   - Notificaciones cuando cambien normativas
+   - Historial de cambios tributarios
+
+**Ejecutar en modo verificación estricta y confirmar:**
+1. Que todos los cálculos fiscales sean exactos
+2. Que los formatos cumplan normativa 2024
+3. Que existan alertas para cambios futuros
+```
+
+## Comando de verificación post-implementación:
+```bash
+python verify_tax_rates.py --current-year=2024 --country=ECUADOR
+```
+
+¿Necesitas que agregue algún otro requisito específico del SRI o de la normativa ecuatoriana?

@@ -1,0 +1,103 @@
+# Sistema Contable Completo para Ecuador (Normativa 2024)
+
+```markdown
+**SOLICITUD TÉCNICA INTEGRAL PARA AGENTE DE REPLIT**
+
+## 1. REQUISITOS TRIBUTARIOS (ACTUALIZADO JULIO 2024)
+```python
+# Tasas impositivas vigentes
+IMPUESTOS = {
+    'IVA': {
+        'general': 15.0,    # Bienes/servicios estándar
+        'reducido': 5.0,    # Medicina básica, alimentos esenciales
+        'cero': 0.0         # Educación, salud pública
+    },
+    'RETENCIONES': {
+        'RENTA': {
+            'bienes': 1.0,
+            'servicios': 2.0,
+            'arrendamientos': 8.0,
+            'honorarios': 10.0
+        },
+        'IVA': {
+            'bienes': 30.0,
+            'servicios': 70.0
+        }
+    },
+    'ICE': {
+        'vehículos': 5.0-35.0,  # Según cilindraje
+        'bebidas_azucaradas': 20.0,
+        'cigarrillos': 50.0
+    }
+}
+```
+
+## 2. MÓDULOS PRINCIPALES
+### Facturación Electrónica
+- Generación automática de XML según formato SRI
+- Códigos de acceso y claves de contingencia
+- 15 tipos de comprobantes electrónicos
+- Consulta web de autorizaciones
+
+### Módulo de Compras
+```javascript
+{
+    "proveedores": {
+        "registro_RUC": "validación automática",
+        "historial_compras": "5 años",
+        "retenciones_automaticas": true,
+        "categorización_SRI": true
+    }
+}
+```
+
+### Módulo de Ventas
+- Gestión de clientes con scoring crediticio
+- Límites de crédito automáticos
+- Generación de proformas convertibles
+- Notas de crédito/débito con validación SRI
+
+## 3. FORMATOS DE IMPORTACIÓN/EXPORTACIÓN
+| Formato       | Uso                      | Normativa |
+|---------------|--------------------------|-----------|
+| SRI-XML       | Facturación electrónica  | 1.0.0     |
+| SRI-JSON      | API REST                 | 2.3       |
+| Excel-SRI     | Reportes mensuales       | 032-2024  |
+| PDF/A         | Archivo legal            | ISO-19005 |
+
+## 4. INTERFAZ PROFESIONAL
+```css
+/* Especificaciones UI */
+@tailwind {
+    palette: "azul corporativo #2563EB";
+    fonts: "Inter var, sans-serif";
+    components: {
+        dashboard: "dark-mode ready";
+        forms: "validación en tiempo real";
+        reports: "exportación 1-click";
+    }
+}
+```
+
+## 5. VALIDACIONES FINALES
+1. [ ] Pruebas de stress con 1000 transacciones/min
+2. [ ] Auditoría de seguridad OWASP Top 10
+3. [ ] Certificación de cálculos con CPA contable
+4. [ ] Documentación técnica y manual de usuario
+
+**COMANDO DE IMPLEMENTACIÓN:**  
+`replit-agent --build --validate=STRICT --modules=ALL --country=ECUADOR --year=2024`
+
+## INSTRUCCIONES POST-INSTALACIÓN:
+```bash
+# 1. Verificar tasas impositivas
+python verify_taxes.py --current
+
+# 2. Ejecutar suite de pruebas
+npm run test:full
+
+# 3. Generar documentación
+node generate_docs.js --format=PDF,HTML
+```
+
+¿Necesitas que desarrolle algún módulo adicional o que profundice en alguna sección específica?
