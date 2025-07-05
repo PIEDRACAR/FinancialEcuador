@@ -1174,6 +1174,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         amount: 850.75,
         dueDate: "2024-07-28",
         description: "Declaración de retenciones en la fuente"
+      },
+      {
+        id: "3",
+        form: "102",
+        period: "2024",
+        status: "processed",
+        submittedAt: "2024-04-30T16:00:00Z",
+        processedAt: "2024-05-02T10:30:00Z",
+        amount: 2150.00,
+        dueDate: "2024-04-30",
+        description: "Declaración anual impuesto renta personas naturales"
+      },
+      {
+        id: "4",
+        form: "101",
+        period: "2024",
+        status: "pending",
+        submittedAt: null,
+        amount: 5500.00,
+        dueDate: "2024-04-30",
+        description: "Declaración anual impuesto renta sociedades"
       }
     ];
     

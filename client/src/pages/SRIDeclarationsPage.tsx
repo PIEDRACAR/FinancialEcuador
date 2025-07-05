@@ -281,7 +281,7 @@ export default function SRIDeclarationsPage() {
           </TabsList>
 
           <TabsContent value="submit" className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {/* Form 104 - IVA */}
               <Card>
                 <CardHeader>
@@ -384,15 +384,15 @@ export default function SRIDeclarationsPage() {
                 </CardContent>
               </Card>
 
-              {/* Form 102 - Impuesto a la Renta */}
+              {/* Form 102 - Impuesto a la Renta Personas Naturales */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <FileText className="h-5 w-5" />
-                    Formulario 102 - Renta
+                    Formulario 102 - Renta PN
                   </CardTitle>
                   <CardDescription>
-                    Declaración anual de impuesto a la renta
+                    Declaración anual personas naturales
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -404,21 +404,21 @@ export default function SRIDeclarationsPage() {
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-sm">Gastos deducibles:</span>
+                      <span className="text-sm">Gastos personales:</span>
                       <span className="text-sm font-medium">
-                        ${(totalSales * 0.6 * 12).toLocaleString('es-EC', { minimumFractionDigits: 2 })}
+                        ${Math.min(totalSales * 12 * 0.5, 15954).toLocaleString('es-EC', { minimumFractionDigits: 2 })}
                       </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-sm">Base imponible:</span>
                       <span className="text-sm font-medium">
-                        ${(totalSales * 0.4 * 12).toLocaleString('es-EC', { minimumFractionDigits: 2 })}
+                        ${Math.max(0, (totalSales * 12) - Math.min(totalSales * 12 * 0.5, 15954)).toLocaleString('es-EC', { minimumFractionDigits: 2 })}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-sm">Impuesto calculado:</span>
+                      <span className="text-sm">Impuesto tabla progresiva:</span>
                       <span className="text-sm font-medium">
-                        ${(totalSales * 0.4 * 12 * 0.22).toLocaleString('es-EC', { minimumFractionDigits: 2 })}
+                        ${((totalSales * 12 > 11722) ? (totalSales * 12 * 0.15) : 0).toLocaleString('es-EC', { minimumFractionDigits: 2 })}
                       </span>
                     </div>
                   </div>
@@ -427,11 +427,11 @@ export default function SRIDeclarationsPage() {
                     <div className="flex justify-between items-center">
                       <span className="font-medium">Total a pagar:</span>
                       <span className="font-bold text-lg">
-                        ${(totalSales * 0.4 * 12 * 0.22).toLocaleString('es-EC', { minimumFractionDigits: 2 })}
+                        ${((totalSales * 12 > 11722) ? (totalSales * 12 * 0.15) : 0).toLocaleString('es-EC', { minimumFractionDigits: 2 })}
                       </span>
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">
-                      *Cálculo estimado - Verificar con contador
+                      *Tabla progresiva 2024 - Verificar con contador
                     </p>
                   </div>
 
@@ -442,6 +442,80 @@ export default function SRIDeclarationsPage() {
                   >
                     <Send className="mr-2 h-4 w-4" />
                     {submitDeclarationMutation.isPending ? "Enviando..." : "Enviar Declaración 102"}
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* Form 101 - Impuesto a la Renta Sociedades */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <FileText className="h-5 w-5" />
+                    Formulario 101 - Renta Sociedades
+                  </CardTitle>
+                  <CardDescription>
+                    Declaración anual para sociedades
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-sm">Ingresos brutos:</span>
+                      <span className="text-sm font-medium">
+                        ${(totalSales * 12).toLocaleString('es-EC', { minimumFractionDigits: 2 })}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm">Costos y gastos:</span>
+                      <span className="text-sm font-medium">
+                        ${(totalSales * 0.65 * 12).toLocaleString('es-EC', { minimumFractionDigits: 2 })}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm">Utilidad antes participación:</span>
+                      <span className="text-sm font-medium">
+                        ${(totalSales * 0.35 * 12).toLocaleString('es-EC', { minimumFractionDigits: 2 })}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm">Participación trabajadores (15%):</span>
+                      <span className="text-sm font-medium">
+                        ${(totalSales * 0.35 * 12 * 0.15).toLocaleString('es-EC', { minimumFractionDigits: 2 })}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm">Base imponible:</span>
+                      <span className="text-sm font-medium">
+                        ${(totalSales * 0.35 * 12 * 0.85).toLocaleString('es-EC', { minimumFractionDigits: 2 })}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm">Impuesto renta (25%):</span>
+                      <span className="text-sm font-medium">
+                        ${(totalSales * 0.35 * 12 * 0.85 * 0.25).toLocaleString('es-EC', { minimumFractionDigits: 2 })}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <div className="border-t pt-4">
+                    <div className="flex justify-between items-center">
+                      <span className="font-medium">Total a pagar:</span>
+                      <span className="font-bold text-lg">
+                        ${(totalSales * 0.35 * 12 * 0.85 * 0.25).toLocaleString('es-EC', { minimumFractionDigits: 2 })}
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      *Tarifa sociedades 25% - Verificar con contador
+                    </p>
+                  </div>
+
+                  <Button 
+                    onClick={() => handleSubmitDeclaration("101")}
+                    disabled={submitDeclarationMutation.isPending || totalSales === 0}
+                    className="w-full"
+                  >
+                    <Send className="mr-2 h-4 w-4" />
+                    {submitDeclarationMutation.isPending ? "Enviando..." : "Enviar Declaración 101"}
                   </Button>
                 </CardContent>
               </Card>
