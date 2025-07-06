@@ -70,7 +70,7 @@ export function SRIIntegrationPage() {
   // Mutations
   const configureMutation = useMutation({
     mutationFn: async (data: SRIConfig) => {
-      await apiRequest('/api/sri/configure', 'POST', data);
+      await apiRequest('POST', '/api/sri/configure', data);
     },
     onSuccess: () => {
       toast({
@@ -90,7 +90,7 @@ export function SRIIntegrationPage() {
 
   const syncMutation = useMutation({
     mutationFn: async (data: SyncData) => {
-      await apiRequest('/api/sri/sync', 'POST', data);
+      await apiRequest('POST', '/api/sri/sync', data);
     },
     onSuccess: () => {
       toast({
@@ -111,9 +111,10 @@ export function SRIIntegrationPage() {
 
   // Cargar configuración existente
   useEffect(() => {
-    if (sriConfig?.configured && sriConfig.config) {
-      configForm.setValue('ruc', sriConfig.config.ruc);
-      configForm.setValue('ambiente', sriConfig.config.ambiente);
+    if (sriConfig && typeof sriConfig === 'object' && 'configured' in sriConfig && sriConfig.configured && 'config' in sriConfig && sriConfig.config) {
+      const config = sriConfig.config as any;
+      configForm.setValue('ruc', config.ruc || '');
+      configForm.setValue('ambiente', config.ambiente || 'produccion');
     }
   }, [sriConfig, configForm]);
 
@@ -169,7 +170,7 @@ export function SRIIntegrationPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Compras</p>
-                <p className="text-2xl font-bold">{stats?.compras || 0}</p>
+                <p className="text-2xl font-bold">{(stats as any)?.compras || 0}</p>
               </div>
               <Download className="w-8 h-8 text-blue-500" />
             </div>
@@ -180,7 +181,7 @@ export function SRIIntegrationPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Ventas</p>
-                <p className="text-2xl font-bold">{stats?.ventas || 0}</p>
+                <p className="text-2xl font-bold">{(stats as any)?.ventas || 0}</p>
               </div>
               <Upload className="w-8 h-8 text-green-500" />
             </div>
@@ -191,7 +192,7 @@ export function SRIIntegrationPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Retenciones</p>
-                <p className="text-2xl font-bold">{stats?.retenciones || 0}</p>
+                <p className="text-2xl font-bold">{(stats as any)?.retenciones || 0}</p>
               </div>
               <BarChart3 className="w-8 h-8 text-orange-500" />
             </div>
@@ -202,7 +203,7 @@ export function SRIIntegrationPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Total</p>
-                <p className="text-2xl font-bold">{stats?.total || 0}</p>
+                <p className="text-2xl font-bold">{(stats as any)?.total || 0}</p>
               </div>
               <Settings className="w-8 h-8 text-purple-500" />
             </div>
@@ -266,17 +267,17 @@ export function SRIIntegrationPage() {
                 </Select>
               </div>
 
-              {sriConfig?.configured && (
+              {(sriConfig as any)?.configured && (
                 <div className="p-3 bg-green-50 border border-green-200 rounded-md">
                   <div className="flex items-center space-x-2">
                     <CheckCircle className="w-4 h-4 text-green-600" />
                     <span className="text-sm text-green-800">
-                      Configurado: {sriConfig.config.ruc} ({sriConfig.config.ambiente})
+                      Configurado: {(sriConfig as any).config.ruc} ({(sriConfig as any).config.ambiente})
                     </span>
                   </div>
-                  {sriConfig.config.lastSync && (
+                  {(sriConfig as any).config.lastSync && (
                     <p className="text-xs text-green-600 mt-1">
-                      Última sincronización: {new Date(sriConfig.config.lastSync).toLocaleString()}
+                      Última sincronización: {new Date((sriConfig as any).config.lastSync).toLocaleString()}
                     </p>
                   )}
                 </div>
@@ -349,12 +350,12 @@ export function SRIIntegrationPage() {
               <Button 
                 type="submit" 
                 className="w-full"
-                disabled={syncMutation.isPending || !sriConfig?.configured}
+                disabled={syncMutation.isPending || !(sriConfig as any)?.configured}
               >
                 {syncMutation.isPending ? 'Sincronizando...' : 'Iniciar Sincronización'}
               </Button>
 
-              {!sriConfig?.configured && (
+              {!(sriConfig as any)?.configured && (
                 <p className="text-sm text-orange-600 text-center">
                   Configure primero su acceso al SRI
                 </p>
