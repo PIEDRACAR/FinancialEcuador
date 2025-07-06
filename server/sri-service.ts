@@ -123,6 +123,22 @@ export class SRIService {
           sriData = await SRIFetcher.fetchSRI(ruc, clientIP, forceRefresh);
         }
         
+        // Si todos los métodos fallan, intentar con navegador real
+        if (!sriData) {
+          try {
+            console.log(`[SRI] 🌐 Probando navegador real con Puppeteer...`);
+            const { SRIBrowserFetcher } = await import('./sri-browser-fetcher.js');
+            sriData = await SRIBrowserFetcher.fetchWithBrowser(ruc);
+            
+            if (sriData) {
+              console.log(`[SRI] ✅ Datos obtenidos con navegador real`);
+              SRIFetcher.setCachedData(ruc, sriData);
+            }
+          } catch (browserError: any) {
+            console.log(`[SRI] Navegador real también falló: ${browserError.message}`);
+          }
+        }
+        
         // Si todos los métodos fallan, mostrar error real
         if (!sriData) {
           throw new Error('No se pudo obtener datos del SRI Ecuador. Los servidores oficiales no están disponibles o el RUC no existe.');
