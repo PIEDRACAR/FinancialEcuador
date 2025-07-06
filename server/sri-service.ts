@@ -327,6 +327,49 @@ export class SRIService {
           nombres: 'MARIA ELENA',
           apellidos: 'RODRIGUEZ GARCIA'
         }
+      },
+      '0940363229001': {
+        ruc: '0940363229001',
+        razonSocial: 'EMPRESA COMERCIAL INNOVADORA CIA. LTDA.',
+        nombreComercial: 'ECILTDA',
+        tipoContribuyente: 'PERSONA JURÍDICA',
+        estado: 'ACTIVO',
+        claseContribuyente: 'OTROS',
+        fechaInicioActividades: '2021-06-10',
+        fechaActualizacion: new Date().toISOString().split('T')[0],
+        actividadEconomica: {
+          principal: {
+            codigo: 'G4711',
+            descripcion: 'VENTA AL POR MENOR EN COMERCIOS NO ESPECIALIZADOS'
+          },
+          secundarias: []
+        },
+        direccion: {
+          provincia: 'Guayas',
+          canton: 'Guayaquil',
+          parroquia: 'Tarqui',
+          direccionCompleta: 'Av. Carlos Julio Arosemena Km 3.5, Edificio Comercial Plaza Norte'
+        },
+        obligaciones: {
+          llevarContabilidad: true,
+          agenteRetencion: false,
+          regimen: 'GENERAL'
+        },
+        representanteLegal: {
+          cedula: '0940363229',
+          nombres: 'JUAN CARLOS',
+          apellidos: 'MENDOZA SILVA'
+        },
+        establecimientos: [{
+          codigo: '001',
+          nombre: 'MATRIZ',
+          direccion: 'Av. Carlos Julio Arosemena Km 3.5',
+          estado: 'ABIERTO'
+        }],
+        contacto: {
+          email: 'info@eciltda.com',
+          telefono: '04-2567890'
+        }
       }
     };
 
