@@ -1,0 +1,102 @@
+¡Excelente! Veo que **ya tienes un sistema avanzado implementado** para la consulta automática de RUC del SRI (Ecuador), con características superiores a las solicitadas inicialmente. Aquí está la **orden consolidada** para el Agente de Replit, enfocada en **mejoras, mantenimiento y despliegue**:
+
+---
+
+### **Orden para el Agente de Replit**  
+**Objetivo**: Optimizar y mantener el sistema ya implementado de consulta RUC.  
+
+#### **1. Verificar y Mejorar el Sistema Actual**  
+- **Confirmar funcionalidades existentes**:  
+  ```bash
+  # Probar el endpoint de consulta RUC
+  curl -X GET "https://financial-ecuador-contabilidad.replit.app/api/consultar-ruc?ruc=0907912059001"
+  ```
+  - Validar que retorne:  
+    ```json
+    {
+      "razonSocial": "EMPRESA EJEMPLO S.A.",
+      "direccion": "AV. PRINCIPAL 123",
+      "estado": "ACTIVO",
+      "actividadEconomica": "COMERCIO"
+    }
+    ```
+
+- **Optimizar anti-detección (Puppeteer Stealth)**:  
+  Actualizar `server/auth_server.py` para rotar User-Agents y usar proxies:  
+  ```python
+  from fp.fp import FreeProxy
+  from fake_useragent import UserAgent
+
+  ua = UserAgent()
+  proxy = FreeProxy().get()
+
+  headers = {
+      "User-Agent": ua.random,
+      "Accept-Language": "es-EC,es;q=0.9"
+  }
+  ```
+
+#### **2. Implementar Rate Limiting y Cache**  
+- **Añadir Redis para cache**:  
+  ```python
+  from redis import Redis
+  redis = Redis(host="localhost", port=6379, db=0)
+
+  @app.get("/api/consultar-ruc")
+  async def get_ruc(ruc: str):
+      cached_data = redis.get(f"ruc:{ruc}")
+      if cached_data:
+          return json.loads(cached_data)
+      # ... (consulta al SRI)
+      redis.setex(f"ruc:{ruc}", 86400, json.dumps(data))  # Cache por 24h
+  ```
+
+#### **3. Mejorar el Frontend**  
+- **Agregar feedback visual**:  
+  En `client/src/components/EmpresaForm.js`:  
+  ```javascript
+  async function consultarRUC() {
+      showLoadingSpinner();
+      try {
+          const data = await fetch(`/api/consultar-ruc?ruc=${ruc}`);
+          if (data.error) showToast("RUC no encontrado", "error");
+          else fillForm(data);
+      } catch (error) {
+          showToast("Error de conexión con el SRI", "error");
+      }
+  }
+  ```
+
+#### **4. Desplegar en Producción**  
+- **Ejecutar despliegue automático**:  
+  ```bash
+  git add .
+  git commit -m "Optimización consulta RUC"
+  git push origin main
+  ```
+  - Verificar en:  
+    [https://financial-ecuador-contabilidad.replit.app](https://financial-ecuador-contabilidad.replit.app)
+
+#### **5. Monitoreo Post-Despliegue**  
+- **Configurar logs y alertas**:  
+  ```bash
+  # Monitorear errores 500
+  tail -f /var/log/auth_server.log | grep "ERROR"
+  ```
+
+---
+
+### **¿Qué sigue?**  
+1. **Pruebas**: Verificar con RUCs de prueba (`0907912059001`, `1792060346001`).  
+2. **Documentación**: Actualizar `README.md` con las nuevas características.  
+3. **Escalabilidad**: Configurar balanceador de carga si el tráfico aumenta.  
+
+---
+
+### **Mensaje Clave**  
+Tu sistema ya está **10 pasos adelante** de la guía inicial. ¡Enfócate en:  
+✅ **Estabilizar** lo existente (logs, cache).  
+✅ **Mejorar UX** con feedback visual.  
+✅ **Documentar** para el equipo.  
+
+¿Necesitas ajustar algo más? ¡Estoy aquí para ayudarte! 🚀
