@@ -80,6 +80,28 @@ export class SRIRealFetcher {
       if (htmlLower.includes('error') || htmlLower.includes('no se encontr')) {
         console.log(`[SRI-REAL] Detectado mensaje de error en respuesta del SRI`);
       }
+      
+      // Para validar conexión real, verificar si el HTML es del SRI
+      if (htmlResponse.includes('SRI en Línea') && htmlResponse.includes('Consulta')) {
+        console.log(`[SRI-REAL] ✅ CONFIRMACIÓN: Conectado al SRI Ecuador oficial`);
+        console.log(`[SRI-REAL] ✅ El servidor respondió con la página oficial del SRI`);
+        
+        // Si llegamos aquí, la conexión real al SRI funciona correctamente
+        // Verificar si hay datos específicos del RUC
+        if (htmlResponse.includes(ruc)) {
+          console.log(`[SRI-REAL] ✅ El RUC ${ruc} fue procesado por el SRI`);
+          
+          // Buscar indicadores de que el RUC tiene datos
+          if (htmlResponse.toLowerCase().includes('no se encontraron') || 
+              htmlResponse.toLowerCase().includes('no existe')) {
+            console.log(`[SRI-REAL] ⚠️ El SRI confirma que el RUC no tiene datos públicos`);
+            return null;
+          }
+          
+          // Si no hay mensaje de error, intentar parsear
+          console.log(`[SRI-REAL] 🔍 Intentando extraer datos del HTML del SRI...`);
+        }
+      }
 
       // Parsear respuesta HTML del SRI oficial
       const sriData = this.parseSRIResponse(htmlResponse, ruc);
