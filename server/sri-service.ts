@@ -110,27 +110,22 @@ export class SRIService {
         console.log(`[SRI] 🔧 Headers anti-detección configurados`);
         console.log(`[SRI] ⚡ Timeout: 10 segundos por endpoint`);
         
-        // Detectar entorno de producción vs desarrollo
-        const isProduction = process.env.NODE_ENV === 'production' || process.env.REPLIT_DEPLOYMENT === 'true';
+        // CONEXIÓN REAL AL SRI ECUADOR - DATOS OFICIALES
+        console.log(`[SRI] 🚀 CONECTANDO AL SRI REAL - Datos oficiales Ecuador`);
         
-        if (isProduction) {
-          console.log(`[SRI] 🚀 ENTORNO PRODUCCIÓN - Iniciando web scraping real`);
-          
-          // En producción: usar web scraping real
+        // Usar fetcher directo que conecta al SRI oficial
+        const { SRIRealFetcher } = await import('./sri-real-fetcher');
+        sriData = await SRIRealFetcher.fetchFromSRI(ruc);
+        
+        // Si falla la conexión directa, intentar endpoints alternativos
+        if (!sriData) {
+          console.log(`[SRI] Conexión directa falló, probando endpoints alternativos...`);
           sriData = await SRIFetcher.fetchSRI(ruc, clientIP, forceRefresh);
-          
-          // Si falla HTTP, usar Puppeteer
-          if (!sriData) {
-            console.log(`[SRI] HTTP falló, usando Puppeteer para scraping real...`);
-            const { SRIScraper } = await import('./sri-scraper');
-            sriData = await SRIScraper.scrapeSRI(ruc, clientIP, forceRefresh);
-          }
-        } else {
-          console.log(`[SRI] 🧪 ENTORNO DESARROLLO - Simulando consulta real`);
-          console.log(`[SRI] ⚠️  En producción esto obtendrá datos REALES del SRI Ecuador`);
-          
-          // En desarrollo: simular consulta pero mostrar capacidades reales
-          sriData = await this.simularConsultaRealSRI(ruc);
+        }
+        
+        // Si todos los métodos fallan, mostrar error real
+        if (!sriData) {
+          throw new Error('No se pudo obtener datos del SRI Ecuador. Los servidores oficiales no están disponibles o el RUC no existe.');
         }
         
         if (sriData) {

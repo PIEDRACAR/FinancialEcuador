@@ -170,16 +170,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const sriData = await SRIService.consultarRUC(ruc, clientIP, forceRefresh);
       
       if (!sriData) {
-        // Devolver el mensaje específico sobre la consulta manual del SRI
-        return res.status(404).json({ 
-          error: `Sistema sin acceso directo al SRI de Ecuador
-
-Para obtener información oficial del RUC ${ruc}:
-1. Visite: https://srienlinea.sri.gob.ec/facturacion-internet/consultas/publico/ruc-datos2.jspa
-2. Consulte los datos oficiales del SRI
-3. Complete manualmente los campos del formulario con la información oficial
-
-Esta verificación garantiza que use datos oficiales y actualizados del SRI Ecuador.`
+        return res.status(503).json({ 
+          error: `No se pudo obtener información del RUC ${ruc} desde los servidores del SRI Ecuador. Los servidores oficiales pueden estar temporalmente no disponibles.`
         });
       }
 
