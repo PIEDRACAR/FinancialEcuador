@@ -1368,6 +1368,123 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // SRI Integration routes - Import direct data from SRI
+  app.post('/api/sri/configure', requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const { ruc, claveContribuyente, ambiente } = req.body;
+      
+      if (!ruc || !claveContribuyente) {
+        return res.status(400).json({ error: 'RUC y clave del contribuyente son requeridos' });
+      }
+      
+      const { SRIIntegrationService } = await import('./sri-integration.js');
+      const config = await SRIIntegrationService.configureCompanySRI(
+        req.companyId!,
+        ruc,
+        claveContribuyente,
+        ambiente
+      );
+      
+      res.json({
+        message: 'Configuración SRI guardada exitosamente',
+        config: {
+          id: config.id,
+          ruc: config.ruc,
+          ambiente: config.ambiente,
+          autoSync: config.autoSync,
+          syncFrequency: config.syncFrequency,
+          syncStatus: config.syncStatus
+        }
+      });
+    } catch (error: any) {
+      console.error('Error configurando SRI:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+  
+  app.post('/api/sri/sync', requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const { fechaInicio, fechaFin, tipos } = req.body;
+      
+      if (!fechaInicio || !fechaFin) {
+        return res.status(400).json({ error: 'Fecha inicio y fin son requeridas' });
+      }
+      
+      const { SRIIntegrationService } = await import('./sri-integration.js');
+      
+      // Iniciar sincronización asíncrona
+      SRIIntegrationService.syncCompanyData(
+        req.companyId!,
+        new Date(fechaInicio),
+        new Date(fechaFin),
+        tipos || ['compras', 'ventas', 'retenciones']
+      ).catch(error => {
+        console.error('Error en sincronización SRI:', error);
+      });
+      
+      res.json({
+        message: 'Sincronización SRI iniciada',
+        status: 'processing'
+      });
+    } catch (error: any) {
+      console.error('Error iniciando sincronización SRI:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+  
+  app.get('/api/sri/config', requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const { SRIIntegrationService } = await import('./sri-integration.js');
+      const config = await SRIIntegrationService.getCompanySRIConfig(req.companyId!);
+      
+      if (!config) {
+        return res.json({ configured: false });
+      }
+      
+      res.json({
+        configured: true,
+        config: {
+          id: config.id,
+          ruc: config.ruc,
+          ambiente: config.ambiente,
+          autoSync: config.autoSync,
+          syncFrequency: config.syncFrequency,
+          syncStatus: config.syncStatus,
+          lastSync: config.lastSync
+        }
+      });
+    } catch (error: any) {
+      console.error('Error obteniendo configuración SRI:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+  
+  app.get('/api/sri/stats', requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const { SRIIntegrationService } = await import('./sri-integration.js');
+      const stats = await SRIIntegrationService.getSyncStats(req.companyId!);
+      
+      res.json(stats);
+    } catch (error: any) {
+      console.error('Error obteniendo estadísticas SRI:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+  
+  app.get('/api/sri/logs', requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 50;
+      
+      const { SRIIntegrationService } = await import('./sri-integration.js');
+      const logs = await SRIIntegrationService.getSyncLogs(req.companyId!, limit);
+      
+      res.json(logs);
+    } catch (error: any) {
+      console.error('Error obteniendo logs SRI:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

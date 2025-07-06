@@ -28,6 +28,7 @@ import ImportPurchasesPage from "@/pages/ImportPurchasesPage";
 import FinancialStatementsPage from "@/pages/FinancialStatementsPage";
 import ElectronicInvoicingPage from "@/pages/ElectronicInvoicingPage";
 import ChartAccountsPage from "@/pages/ChartAccountsPage";
+import { SRIIntegrationPage } from "@/pages/SRIIntegrationPage";
 import JournalEntriesPage from "@/pages/JournalEntriesPage";
 import LedgerPage from "@/pages/LedgerPage";
 import BalanceSheetPage from "@/pages/BalanceSheetPage";
@@ -183,6 +184,11 @@ function Router() {
       <Route path="/dashboard/import-sri">
         <DashboardWrapper>
           <SRIImportPage />
+        </DashboardWrapper>
+      </Route>
+      <Route path="/dashboard/sri-integration">
+        <DashboardWrapper>
+          <SRIIntegrationPage />
         </DashboardWrapper>
       </Route>
       <Route path="/">

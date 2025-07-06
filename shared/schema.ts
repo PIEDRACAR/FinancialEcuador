@@ -424,3 +424,138 @@ export const ECUADOR_TAX_RATES = {
     AMBIENTE_PRODUCCION: 2
   }
 };
+
+// Configuración SRI para importación automática
+export const sriConfig = pgTable("sri_config", {
+  id: text("id").primaryKey().notNull(),
+  companyId: integer("company_id").references(() => companies.id).notNull(),
+  ruc: text("ruc").notNull(),
+  claveContribuyente: text("clave_contribuyente").notNull(), // Encriptada
+  ambiente: text("ambiente").default("produccion"), // produccion o pruebas
+  certificadoDigital: text("certificado_digital"), // Para firmas electrónicas
+  lastSync: timestamp("last_sync"),
+  syncStatus: text("sync_status").default("pending"), // pending, syncing, completed, error
+  autoSync: boolean("auto_sync").default(true),
+  syncFrequency: text("sync_frequency").default("daily"), // hourly, daily, weekly
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Log de sincronizaciones SRI
+export const sriSyncLog = pgTable("sri_sync_log", {
+  id: text("id").primaryKey().notNull(),
+  companyId: integer("company_id").references(() => companies.id).notNull(),
+  syncType: text("sync_type").notNull(), // compras, ventas, retenciones, anulaciones
+  startTime: timestamp("start_time").defaultNow(),
+  endTime: timestamp("end_time"),
+  status: text("status").notNull(), // success, error, partial
+  recordsProcessed: integer("records_processed").default(0),
+  recordsImported: integer("records_imported").default(0),
+  errors: text("errors"), // JSON con errores detallados
+  details: text("details"), // JSON con detalles de la importación
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Compras importadas del SRI
+export const comprasSRI = pgTable("compras_sri", {
+  id: text("id").primaryKey().notNull(),
+  companyId: integer("company_id").references(() => companies.id).notNull(),
+  numeroComprobante: text("numero_comprobante").notNull(),
+  rucProveedor: text("ruc_proveedor").notNull(),
+  razonSocialProveedor: text("razon_social_proveedor").notNull(),
+  fechaEmision: timestamp("fecha_emision").notNull(),
+  fechaAutorizacion: timestamp("fecha_autorizacion"),
+  tipoComprobante: text("tipo_comprobante").notNull(), // 01=Factura, 03=Liquidacion, 04=Nota Credito, 05=Nota Debito
+  ambiente: text("ambiente").notNull(), // 1=Pruebas, 2=Produccion
+  baseImponible: decimal("base_imponible", { precision: 10, scale: 2 }).default("0"),
+  baseImpGrav: decimal("base_imp_grav", { precision: 10, scale: 2 }).default("0"),
+  baseImpExe: decimal("base_imp_exe", { precision: 10, scale: 2 }).default("0"),
+  montoIce: decimal("monto_ice", { precision: 10, scale: 2 }).default("0"),
+  montoIva: decimal("monto_iva", { precision: 10, scale: 2 }).default("0"),
+  valorRetenidoIva: decimal("valor_retenido_iva", { precision: 10, scale: 2 }).default("0"),
+  valorRetenidoRenta: decimal("valor_retenido_renta", { precision: 10, scale: 2 }).default("0"),
+  valorTotal: decimal("valor_total", { precision: 10, scale: 2 }).notNull(),
+  estadoComprobante: text("estado_comprobante").default("AUTORIZADO"), // AUTORIZADO, ANULADO
+  claveAcceso: text("clave_acceso").notNull().unique(),
+  xml: text("xml"), // XML completo del comprobante
+  processed: boolean("processed").default(false), // Si ya se procesó contablemente
+  invoiceId: integer("invoice_id").references(() => invoices.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Ventas reportadas al SRI
+export const ventasSRI = pgTable("ventas_sri", {
+  id: text("id").primaryKey().notNull(),
+  companyId: integer("company_id").references(() => companies.id).notNull(),
+  numeroComprobante: text("numero_comprobante").notNull(),
+  rucCliente: text("ruc_cliente").notNull(),
+  razonSocialCliente: text("razon_social_cliente").notNull(),
+  fechaEmision: timestamp("fecha_emision").notNull(),
+  fechaAutorizacion: timestamp("fecha_autorizacion"),
+  tipoComprobante: text("tipo_comprobante").notNull(),
+  ambiente: text("ambiente").notNull(),
+  baseImponible: decimal("base_imponible", { precision: 10, scale: 2 }).default("0"),
+  baseImpGrav: decimal("base_imp_grav", { precision: 10, scale: 2 }).default("0"),
+  baseImpExe: decimal("base_imp_exe", { precision: 10, scale: 2 }).default("0"),
+  montoIce: decimal("monto_ice", { precision: 10, scale: 2 }).default("0"),
+  montoIva: decimal("monto_iva", { precision: 10, scale: 2 }).default("0"),
+  valorTotal: decimal("valor_total", { precision: 10, scale: 2 }).notNull(),
+  estadoComprobante: text("estado_comprobante").default("AUTORIZADO"),
+  claveAcceso: text("clave_acceso").notNull().unique(),
+  xml: text("xml"),
+  processed: boolean("processed").default(false),
+  invoiceId: integer("invoice_id").references(() => invoices.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Retenciones emitidas
+export const retencionesSRI = pgTable("retenciones_sri", {
+  id: text("id").primaryKey().notNull(),
+  companyId: integer("company_id").references(() => companies.id).notNull(),
+  numeroRetencion: text("numero_retencion").notNull(),
+  rucSujeto: text("ruc_sujeto").notNull(),
+  razonSocialSujeto: text("razon_social_sujeto").notNull(),
+  fechaEmision: timestamp("fecha_emision").notNull(),
+  fechaAutorizacion: timestamp("fecha_autorizacion"),
+  tipoDocumentoSustento: text("tipo_documento_sustento").notNull(), // 01=Factura, 03=Liquidacion
+  numeroDocumentoSustento: text("numero_documento_sustento").notNull(),
+  fechaEmisionDocSustento: timestamp("fecha_emision_doc_sustento").notNull(),
+  baseImponible: decimal("base_imponible", { precision: 10, scale: 2 }).notNull(),
+  impuesto: text("impuesto").notNull(), // 1=RENTA, 2=IVA, 6=ICE
+  codigoRetencion: text("codigo_retencion").notNull(),
+  porcentajeRetencion: decimal("porcentaje_retencion", { precision: 5, scale: 2 }).notNull(),
+  valorRetenido: decimal("valor_retenido", { precision: 10, scale: 2 }).notNull(),
+  claveAcceso: text("clave_acceso").notNull().unique(),
+  xml: text("xml"),
+  processed: boolean("processed").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Anulaciones de comprobantes
+export const anulacionesSRI = pgTable("anulaciones_sri", {
+  id: text("id").primaryKey().notNull(),
+  companyId: integer("company_id").references(() => companies.id).notNull(),
+  claveAccesoAnulado: text("clave_acceso_anulado").notNull(),
+  fechaAnulacion: timestamp("fecha_anulacion").notNull(),
+  motivo: text("motivo").notNull(),
+  tipoComprobante: text("tipo_comprobante").notNull(),
+  numeroComprobante: text("numero_comprobante").notNull(),
+  processed: boolean("processed").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export type SRIConfig = typeof sriConfig.$inferSelect;
+export type InsertSRIConfig = typeof sriConfig.$inferInsert;
+export type SRISyncLog = typeof sriSyncLog.$inferSelect;
+export type InsertSRISyncLog = typeof sriSyncLog.$inferInsert;
+export type CompraSRI = typeof comprasSRI.$inferSelect;
+export type InsertCompraSRI = typeof comprasSRI.$inferInsert;
+export type VentaSRI = typeof ventasSRI.$inferSelect;
+export type InsertVentaSRI = typeof ventasSRI.$inferInsert;
+export type RetencionSRI = typeof retencionesSRI.$inferSelect;
+export type InsertRetencionSRI = typeof retencionesSRI.$inferInsert;
+export type AnulacionSRI = typeof anulacionesSRI.$inferSelect;
+export type InsertAnulacionSRI = typeof anulacionesSRI.$inferInsert;

@@ -63,6 +63,7 @@ export default function Sidebar() {
       icon: Globe, 
       label: "SRI Ecuador", 
       children: [
+        { icon: Globe, label: "Integración Directa SRI", path: "/dashboard/sri-integration" },
         { icon: Globe, label: "Declaraciones SRI", path: "/dashboard/sri-declarations" },
         { icon: Upload, label: "Importar XML SRI", path: "/dashboard/import-sri" },
         { icon: Download, label: "Exportar XML SRI", path: "/dashboard/export-sri" },
