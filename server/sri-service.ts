@@ -268,6 +268,38 @@ export class SRIService {
           agenteRetencion: false,
           regimen: 'MICROEMPRESAS'
         }
+      },
+      '0917922858001': {
+        ruc: '0917922858001',
+        razonSocial: 'DISTRIBUIDORA COMERCIAL GUAYAQUIL S.A.',
+        nombreComercial: 'DISCOMGUAYAQUIL',
+        tipoContribuyente: 'PERSONA JURÍDICA',
+        estado: 'ACTIVO',
+        claseContribuyente: 'OTROS',
+        fechaInicioActividades: '2019-11-12',
+        fechaActualizacion: new Date().toISOString().split('T')[0],
+        actividadEconomica: {
+          principal: {
+            codigo: 'G4619',
+            descripcion: 'VENTA AL POR MAYOR DE PRODUCTOS VARIOS'
+          }
+        },
+        direccion: {
+          provincia: 'Guayas',
+          canton: 'Guayaquil',
+          parroquia: 'Ximena',
+          direccionCompleta: 'Av. 25 de Julio y Calle 18 NE, Ciudadela Ximena'
+        },
+        obligaciones: {
+          llevarContabilidad: true,
+          agenteRetencion: true,
+          regimen: 'GENERAL'
+        },
+        representanteLegal: {
+          cedula: '0917922858',
+          nombres: 'MARIA ELENA',
+          apellidos: 'RODRIGUEZ GARCIA'
+        }
       }
     };
 

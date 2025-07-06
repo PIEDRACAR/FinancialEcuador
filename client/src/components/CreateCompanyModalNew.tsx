@@ -119,10 +119,11 @@ export default function CreateCompanyModalNew({ open, onOpenChange }: CreateComp
       console.log("SRI REAL - Respuesta del servidor:", data);
 
       if (!response.ok) {
+        console.log("SRI REAL - Error en consulta:", data.error);
         setSearchError(data.error || "Error consultando RUC en SRI");
         toast({
-          title: "⚠️ Consulta SRI no disponible",
-          description: "Servidores del SRI temporalmente no disponibles",
+          title: "⚠️ Error en consulta SRI",
+          description: "No se pudo obtener información del RUC",
           variant: "destructive",
         });
         return;
