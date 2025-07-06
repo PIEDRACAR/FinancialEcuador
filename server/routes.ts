@@ -156,6 +156,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     try {
       const { ruc } = req.params;
+      const { refresh } = req.query;
+      const clientIP = req.ip || req.connection.remoteAddress || '127.0.0.1';
       
       if (!ruc || ruc.length !== 13) {
         return res.status(400).json({ 
@@ -163,8 +165,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      console.log(`[API] Consultando RUC: ${ruc}`);
-      const sriData = await SRIService.consultarRUC(ruc);
+      console.log(`[API] Consultando RUC: ${ruc} (IP: ${clientIP})`);
+      const forceRefresh = refresh === 'true';
+      const sriData = await SRIService.consultarRUC(ruc, clientIP, forceRefresh);
       
       if (!sriData) {
         // Devolver el mensaje específico sobre la consulta manual del SRI

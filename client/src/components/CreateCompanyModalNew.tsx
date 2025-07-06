@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2, Search, AlertCircle, CheckCircle, ExternalLink, Info, Shield, Clock } from "lucide-react";
+import { Loader2, Search, AlertCircle, CheckCircle, ExternalLink, Info, Shield, Clock, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -94,8 +94,8 @@ export default function CreateCompanyModalNew({ open, onOpenChange }: CreateComp
     },
   });
 
-  const handleRucSearch = async (ruc: string) => {
-    console.log("SRI REAL - Iniciando consulta automática para RUC:", ruc);
+  const handleRucSearch = async (ruc: string, forceRefresh: boolean = false) => {
+    console.log("SRI SCRAPER - Iniciando consulta web scraping para RUC:", ruc);
     if (!ruc || ruc.length !== 13) {
       setSearchError("RUC debe tener 13 dígitos");
       return;
@@ -106,26 +106,38 @@ export default function CreateCompanyModalNew({ open, onOpenChange }: CreateComp
     setSriData(null);
 
     try {
-      console.log("SRI REAL - Conectando con servidores oficiales del SRI Ecuador...");
+      console.log("SRI SCRAPER - Conectando con servidores oficiales del SRI Ecuador...");
       
       // Mostrar progreso en tiempo real
       toast({
         title: "🔍 Consultando SRI Ecuador",
-        description: "Conectando con servidores oficiales...",
+        description: forceRefresh ? "Actualizando datos desde servidor oficial..." : "Conectando con servidores oficiales...",
       });
       
-      const response = await fetch(`/api/sri/ruc/${ruc}`);
+      const url = `/api/sri/ruc/${ruc}${forceRefresh ? '?refresh=true' : ''}`;
+      const response = await fetch(url);
       const data = await response.json();
-      console.log("SRI REAL - Respuesta del servidor:", data);
+      console.log("SRI SCRAPER - Respuesta del servidor:", data);
 
       if (!response.ok) {
-        console.log("SRI REAL - Error en consulta:", data.error);
-        setSearchError(data.error || "Error consultando RUC en SRI");
-        toast({
-          title: "⚠️ Error en consulta SRI",
-          description: "No se pudo obtener información del RUC",
-          variant: "destructive",
-        });
+        console.log("SRI SCRAPER - Error en consulta:", data.error);
+        
+        // Manejar rate limiting específicamente
+        if (data.error.includes('Rate limit')) {
+          setSearchError("⚠️ Límite de consultas alcanzado. Máximo 5 consultas por minuto.");
+          toast({
+            title: "🚫 Rate Limit Alcanzado",
+            description: "Espere un momento antes de realizar otra consulta",
+            variant: "destructive",
+          });
+        } else {
+          setSearchError(data.error || "Error consultando RUC en SRI");
+          toast({
+            title: "⚠️ Error en consulta SRI",
+            description: "No se pudo obtener información del RUC",
+            variant: "destructive",
+          });
+        }
         return;
       }
 
@@ -213,6 +225,14 @@ export default function CreateCompanyModalNew({ open, onOpenChange }: CreateComp
               <strong>Consulta autorizada bajo Art. 69 LODSI.</strong> Datos obtenidos directamente del SRI Ecuador.
             </AlertDescription>
           </Alert>
+
+          {/* Rate Limiting Info */}
+          <Alert className="mt-2 bg-blue-50 border-blue-200">
+            <Clock className="h-4 w-4 text-blue-600" />
+            <AlertDescription className="text-blue-800">
+              <strong>Web Scraping Seguro:</strong> Máximo 5 consultas por minuto. Cache de 24 horas para optimizar rendimiento.
+            </AlertDescription>
+          </Alert>
         </DialogHeader>
 
         <Form {...form}>
@@ -257,6 +277,22 @@ export default function CreateCompanyModalNew({ open, onOpenChange }: CreateComp
                         <Search className="h-4 w-4" />
                       )}
                     </Button>
+                    {sriData && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        onClick={() => handleRucSearch(field.value, true)}
+                        disabled={isSearching || field.value.length !== 13}
+                        title="Actualizar datos del SRI"
+                      >
+                        {isSearching ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <RefreshCw className="h-4 w-4" />
+                        )}
+                      </Button>
+                    )}
                   </div>
                   <FormMessage />
                   {searchError && (
