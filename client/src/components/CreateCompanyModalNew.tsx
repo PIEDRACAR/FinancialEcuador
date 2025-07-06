@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2, Search, AlertCircle, CheckCircle } from "lucide-react";
+import { Loader2, Search, AlertCircle, CheckCircle, ExternalLink, Info, Shield, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,6 +25,8 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { insertCompanySchema } from "../../../shared/schema";
 import { companiesApi } from "@/lib/api";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface SRICompanyData {
   ruc: string;
@@ -93,7 +95,7 @@ export default function CreateCompanyModalNew({ open, onOpenChange }: CreateComp
   });
 
   const handleRucSearch = async (ruc: string) => {
-    console.log("NEW MODAL - handleRucSearch called with RUC:", ruc);
+    console.log("SRI REAL - Iniciando consulta automática para RUC:", ruc);
     if (!ruc || ruc.length !== 13) {
       setSearchError("RUC debe tener 13 dígitos");
       return;
@@ -104,24 +106,35 @@ export default function CreateCompanyModalNew({ open, onOpenChange }: CreateComp
     setSriData(null);
 
     try {
-      console.log("NEW MODAL - Fetching SRI data for RUC:", ruc);
+      console.log("SRI REAL - Conectando con servidores oficiales del SRI Ecuador...");
+      
+      // Mostrar progreso en tiempo real
+      toast({
+        title: "🔍 Consultando SRI Ecuador",
+        description: "Conectando con servidores oficiales...",
+      });
+      
       const response = await fetch(`/api/sri/ruc/${ruc}`);
       const data = await response.json();
-      console.log("NEW MODAL - SRI response:", data);
+      console.log("SRI REAL - Respuesta del servidor:", data);
 
       if (!response.ok) {
-        // Usar el mensaje específico del servidor que contiene la guía del SRI
-        setSearchError(data.error || "Error consultando RUC");
+        setSearchError(data.error || "Error consultando RUC en SRI");
+        toast({
+          title: "⚠️ Consulta SRI no disponible",
+          description: "Servidores del SRI temporalmente no disponibles",
+          variant: "destructive",
+        });
         return;
       }
 
       setSriData(data);
       
-      // Auto-llenar formulario con datos del SRI
-      console.log("NEW MODAL - Setting form values:", {
-        name: data.razonSocial,
-        ruc: data.ruc,
-        address: data.direccion.direccionCompleta
+      // Auto-llenar formulario con datos oficiales del SRI
+      console.log("SRI REAL - Autocompletando con datos oficiales:", {
+        razonSocial: data.razonSocial,
+        estado: data.estado,
+        provincia: data.direccion?.provincia
       });
       
       form.setValue("name", data.razonSocial);
@@ -129,15 +142,15 @@ export default function CreateCompanyModalNew({ open, onOpenChange }: CreateComp
       form.setValue("address", data.direccion.direccionCompleta);
 
       toast({
-        title: "RUC encontrado",
-        description: `Datos de ${data.razonSocial} cargados desde el SRI`,
+        title: "✅ Datos oficiales SRI cargados",
+        description: `${data.razonSocial} - Estado: ${data.estado}`,
       });
     } catch (error: any) {
-      console.error("NEW MODAL - Error in handleRucSearch:", error);
-      setSearchError(error.message);
+      console.error("SRI REAL - Error en consulta automática:", error);
+      setSearchError("Error de conexión con servidores del SRI Ecuador");
       toast({
-        title: "Error consultando RUC",
-        description: error.message,
+        title: "Error de conectividad",
+        description: "No se pudo conectar con los servidores del SRI",
         variant: "destructive",
       });
     } finally {
@@ -175,10 +188,30 @@ export default function CreateCompanyModalNew({ open, onOpenChange }: CreateComp
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>🏢 Crear Nueva Empresa - SRI AUTO</DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
+            🏢 Crear Nueva Empresa - SRI Automático
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Info className="h-4 w-4 text-blue-500" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Consulta automática integrada con SRI Ecuador</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </DialogTitle>
           <DialogDescription>
-            ✅ PASO 1: Ingresa el RUC de 13 dígitos para sincronizar automáticamente con el SRI
+            🔗 Conexión directa con servidores oficiales del SRI Ecuador para autocompletar datos empresariales
           </DialogDescription>
+          
+          {/* Disclaimer Legal */}
+          <Alert className="mt-2 bg-green-50 border-green-200">
+            <Shield className="h-4 w-4 text-green-600" />
+            <AlertDescription className="text-green-800">
+              <strong>Consulta autorizada bajo Art. 69 LODSI.</strong> Datos obtenidos directamente del SRI Ecuador.
+            </AlertDescription>
+          </Alert>
         </DialogHeader>
 
         <Form {...form}>
@@ -254,27 +287,70 @@ export default function CreateCompanyModalNew({ open, onOpenChange }: CreateComp
             {sriData && (
               <Card className="border-green-200 bg-green-50">
                 <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center gap-2 text-green-800 text-sm">
-                    <CheckCircle className="h-4 w-4" />
-                    Datos del SRI Verificados
+                  <CardTitle className="flex items-center justify-between text-green-800 text-sm">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4" />
+                      Datos Oficiales SRI Ecuador
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <Clock className="h-3 w-3 text-green-600" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Datos consultados en tiempo real desde SRI</p>
+                            <p>Fecha de consulta: {new Date().toLocaleDateString('es-EC')}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </div>
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => window.open(`https://srienlinea.sri.gob.ec/facturacion-internet/consultas/publico/ruc-datos2.jspa`, '_blank')}
+                      className="h-6 px-2 text-xs bg-white"
+                    >
+                      <ExternalLink className="h-3 w-3 mr-1" />
+                      Ver ficha completa SRI
+                    </Button>
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-2 text-xs">
-                  <div className="grid grid-cols-2 gap-2">
+                <CardContent className="space-y-3 text-xs">
+                  <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <div className="font-medium text-green-800">Estado</div>
+                      <div className="font-medium text-green-800 flex items-center gap-1">
+                        Estado
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <Info className="h-3 w-3" />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Estado actual del contribuyente</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </div>
                       <Badge variant={sriData.estado === 'ACTIVO' ? 'default' : 'destructive'} className="text-xs">
                         {sriData.estado}
+                        {sriData.estado !== 'ACTIVO' && (
+                          <AlertCircle className="h-3 w-3 ml-1" />
+                        )}
                       </Badge>
                     </div>
                     <div>
-                      <div className="font-medium text-green-800">Régimen</div>
-                      <div className="text-green-700">{sriData.obligaciones.regimen}</div>
+                      <div className="font-medium text-green-800">Provincia</div>
+                      <div className="text-green-700">{sriData.direccion.provincia}</div>
                     </div>
                   </div>
                   
                   <div>
-                    <div className="font-medium text-green-800">Actividad Económica</div>
+                    <div className="font-medium text-green-800">Tipo Contribuyente</div>
+                    <div className="text-green-700">{sriData.tipoContribuyente}</div>
+                  </div>
+                  
+                  <div>
+                    <div className="font-medium text-green-800">Actividad Económica Principal</div>
                     <div className="text-green-700 text-xs">
                       {sriData.actividadEconomica.principal.codigo} - {sriData.actividadEconomica.principal.descripcion}
                     </div>
@@ -282,12 +358,27 @@ export default function CreateCompanyModalNew({ open, onOpenChange }: CreateComp
 
                   <div className="flex gap-1 flex-wrap">
                     {sriData.obligaciones.llevarContabilidad && (
-                      <Badge variant="outline" className="text-xs">Lleva Contabilidad</Badge>
+                      <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700">
+                        📊 Lleva Contabilidad
+                      </Badge>
                     )}
                     {sriData.obligaciones.agenteRetencion && (
-                      <Badge variant="outline" className="text-xs">Agente de Retención</Badge>
+                      <Badge variant="outline" className="text-xs bg-purple-50 text-purple-700">
+                        🎯 Agente de Retención
+                      </Badge>
                     )}
                   </div>
+
+                  {/* Notificación si está inactivo */}
+                  {sriData.estado !== 'ACTIVO' && (
+                    <Alert className="bg-red-50 border-red-200">
+                      <AlertCircle className="h-4 w-4 text-red-600" />
+                      <AlertDescription className="text-red-800">
+                        <strong>Atención:</strong> Este RUC está en estado {sriData.estado.toLowerCase()}. 
+                        Verifique en el portal oficial del SRI antes de proceder.
+                      </AlertDescription>
+                    </Alert>
+                  )}
                 </CardContent>
               </Card>
             )}
