@@ -1,0 +1,145 @@
+Aquí tienes la **orden detallada** para el Agente de Replit, con todos los pasos necesarios para implementar la **consulta automática de RUC del SRI (Ecuador)** en tu sistema contable:
+
+---
+
+### **Instrucciones para el Agente de Replit**  
+**Objetivo**: Implementar una función que consulte automáticamente los datos de un RUC desde el SRI (Ecuador) al ingresarlo en el formulario de creación de empresas.  
+
+---
+
+#### **1. Configurar el Entorno**  
+- **Verificar dependencias** en `server/`:  
+  ```bash
+  pip install fastapi requests beautifulsoup4 python-multipart uvicorn
+  ```
+- **Actualizar `requirements.txt`**:  
+  ```bash
+  pip freeze > requirements.txt
+  ```
+
+---
+
+#### **2. Implementar el Backend (FastAPI)**  
+**Archivo**: `server/auth_server.py`  
+**Código**:  
+```python
+from fastapi import FastAPI, HTTPException
+import requests
+from bs4 import BeautifulSoup
+
+app = FastAPI()
+
+def consultar_ruc_sri(ruc: str):
+    try:
+        # URL de consulta pública del SRI (Ecuador)
+        url = "https://srienlinea.sri.gob.ec/sri-en-linea/SriRucWeb/ConsultaRuc/Consultas/consultaRuc"
+        payload = {"nruc": ruc}
+        
+        # Simular navegador para evitar bloqueos
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+        }
+        
+        response = requests.post(url, data=payload, headers=headers)
+        response.raise_for_status()
+        
+        # Parsear HTML (scraping)
+        soup = BeautifulSoup(response.text, "html.parser")
+        
+        # Extraer datos (ajusta según el HTML actual del SRI)
+        razon_social = soup.find("span", {"id": "razonSocial"}).text.strip()
+        direccion = soup.find("span", {"id": "direccion"}).text.strip()
+        
+        return {
+            "ruc": ruc,
+            "razonSocial": razon_social,
+            "direccion": direccion,
+            "estado": "ACTIVO"  # Asume que está activo por defecto
+        }
+    
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al consultar el RUC: {str(e)}")
+
+@app.get("/api/consultar-ruc")
+async def get_ruc_data(ruc: str):
+    return consultar_ruc_sri(ruc)
+```
+
+---
+
+#### **3. Frontend (JavaScript - Integración con el Formulario)**  
+**Archivo**: `client/src/components/EmpresaForm.js` (o similar)  
+**Código**:  
+```javascript
+document.getElementById("ruc").addEventListener("change", async function() {
+    const ruc = this.value.trim();
+    
+    if (ruc.length === 13 && !isNaN(ruc)) {
+        try {
+            const response = await fetch(`http://localhost:8000/api/consultar-ruc?ruc=${ruc}`);
+            const data = await response.json();
+            
+            // Autocompletar campos
+            document.getElementById("nombre-empresa").value = data.razonSocial || "";
+            document.getElementById("direccion").value = data.direccion || "";
+            
+        } catch (error) {
+            alert("Error al consultar el RUC. Verifica el número o inténtalo manualmente.");
+            console.error(error);
+        }
+    } else {
+        alert("RUC inválido. Debe tener 13 dígitos numéricos.");
+    }
+});
+```
+
+---
+
+#### **4. Despliegue y Pruebas**  
+- **Iniciar el servidor FastAPI**:  
+  ```bash
+  uvicorn auth_server:app --reload --port 8000
+  ```
+- **Probar la consulta**:  
+  - Abre el formulario en el navegador.  
+  - Ingresa un RUC válido (ej: `0907912059001`).  
+  - Verifica que los campos **Nombre** y **Dirección** se autocompleten.  
+
+---
+
+#### **5. Manejo de Errores (Backend)**  
+- **Casos a validar**:  
+  - RUC con menos de 13 dígitos → `HTTP 400`.  
+  - RUC no encontrado → Retornar `{"error": "RUC no existe"}`.  
+  - Cambios en la estructura HTML del SRI → Actualizar selectores en `BeautifulSoup`.  
+
+---
+
+#### **6. Mensaje Alternativo para Usuarios**  
+Si el scraping falla, muestra esto en el formulario:  
+```plaintext
+⚠️ No se pudo autocompletar. Sigue estos pasos:  
+1. Consulta el RUC manualmente en [SRI en Línea](https://srienlinea.sri.gob.ec).  
+2. Copia los datos oficiales.  
+3. Pégalos en los campos.  
+```
+
+---
+
+### **Orden Final para el Agente**  
+```plaintext
+1. Instalar dependencias y actualizar `requirements.txt`.  
+2. Implementar el endpoint `/api/consultar-ruc` en `auth_server.py`.  
+3. Modificar el formulario en el frontend para usar la API.  
+4. Desplegar y probar con RUCs de ejemplo.  
+5. Documentar posibles errores y alternativas manuales.  
+```
+
+---
+
+### **Notas Clave**  
+- **Legalidad**: El scraping debe usarse solo si el SRI no ofrece una API pública.  
+- **Actualizaciones**: Revisar periódicamente cambios en el HTML del SRI.  
+- **Alternativa Premium**: Registrar tu app en el SRI para acceder a su API oficial.  
+
+¿Necesitas ajustar algo? ¡Déjame saber! 🛠️
