@@ -68,6 +68,19 @@ export class SRIRealFetcher {
       const htmlResponse = await response.text();
       console.log(`[SRI-REAL] HTML recibido del SRI (${htmlResponse.length} caracteres)`);
 
+      // Analizar contenido de la respuesta
+      console.log(`[SRI-REAL] Analizando estructura HTML del SRI...`);
+      
+      // Buscar indicadores de datos en el HTML
+      const htmlLower = htmlResponse.toLowerCase();
+      if (htmlLower.includes('razón social') || htmlLower.includes('razon social')) {
+        console.log(`[SRI-REAL] Detectada sección de datos de empresa en el HTML`);
+      }
+      
+      if (htmlLower.includes('error') || htmlLower.includes('no se encontr')) {
+        console.log(`[SRI-REAL] Detectado mensaje de error en respuesta del SRI`);
+      }
+
       // Parsear respuesta HTML del SRI oficial
       const sriData = this.parseSRIResponse(htmlResponse, ruc);
       
@@ -122,24 +135,43 @@ export class SRIRealFetcher {
    */
   private static parseSRIResponse(html: string, ruc: string): SRICompanyData | null {
     try {
-      // Patrones para extraer datos del HTML del SRI Ecuador
+      console.log(`[SRI-REAL] Iniciando parsing del HTML del SRI...`);
+      
+      // Múltiples patrones para diferentes formatos del SRI
       const patterns = {
-        razonSocial: /<td[^>]*>\s*Razón Social\s*:?\s*<\/td>\s*<td[^>]*>\s*([^<]+)\s*<\/td>/i,
-        estado: /<td[^>]*>\s*Estado\s*:?\s*<\/td>\s*<td[^>]*>\s*([^<]+)\s*<\/td>/i,
-        tipoContribuyente: /<td[^>]*>\s*Tipo\s*:?\s*<\/td>\s*<td[^>]*>\s*([^<]+)\s*<\/td>/i,
-        claseContribuyente: /<td[^>]*>\s*Clase\s*:?\s*<\/td>\s*<td[^>]*>\s*([^<]+)\s*<\/td>/i,
-        direccion: /<td[^>]*>\s*Dirección\s*:?\s*<\/td>\s*<td[^>]*>\s*([^<]+)\s*<\/td>/i,
-        actividad: /<td[^>]*>\s*Actividad\s*:?\s*<\/td>\s*<td[^>]*>\s*([^<]+)\s*<\/td>/i,
-        fechaInicio: /<td[^>]*>\s*Fecha\s+de\s+Inicio\s*:?\s*<\/td>\s*<td[^>]*>\s*([^<]+)\s*<\/td>/i
+        // Patrones para tablas tradicionales
+        razonSocial: [
+          /<td[^>]*>\s*Razón Social\s*:?\s*<\/td>\s*<td[^>]*>\s*([^<]+)\s*<\/td>/i,
+          /<td[^>]*>Razón Social<\/td>\s*<td[^>]*>([^<]+)<\/td>/i,
+          /Razón Social[^>]*:\s*([^<\n]+)/i,
+          /"razonSocial"\s*:\s*"([^"]+)"/i
+        ],
+        estado: [
+          /<td[^>]*>\s*Estado\s*:?\s*<\/td>\s*<td[^>]*>\s*([^<]+)\s*<\/td>/i,
+          /Estado[^>]*:\s*([^<\n]+)/i,
+          /"estado"\s*:\s*"([^"]+)"/i
+        ],
+        tipoContribuyente: [
+          /<td[^>]*>\s*Tipo\s*:?\s*<\/td>\s*<td[^>]*>\s*([^<]+)\s*<\/td>/i,
+          /Tipo[^>]*:\s*([^<\n]+)/i
+        ],
+        direccion: [
+          /<td[^>]*>\s*Dirección\s*:?\s*<\/td>\s*<td[^>]*>\s*([^<]+)\s*<\/td>/i,
+          /Dirección[^>]*:\s*([^<\n]+)/i
+        ]
       };
 
       const extractedData: any = { ruc };
 
-      // Extraer cada campo usando expresiones regulares
-      for (const [field, pattern] of Object.entries(patterns)) {
-        const match = html.match(pattern);
-        if (match && match[1]) {
-          extractedData[field] = match[1].trim();
+      // Extraer cada campo usando múltiples patrones
+      for (const [field, patternArray] of Object.entries(patterns)) {
+        for (const pattern of (patternArray as RegExp[])) {
+          const match = html.match(pattern);
+          if (match && match[1]) {
+            extractedData[field] = match[1].trim();
+            console.log(`[SRI-REAL] Encontrado ${field}: ${match[1].trim()}`);
+            break; // Usar el primer patrón que funcione
+          }
         }
       }
 
