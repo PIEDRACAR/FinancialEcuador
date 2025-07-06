@@ -29,9 +29,9 @@ export class SRIFetcher {
 
   // Endpoints oficiales del SRI Ecuador
   private static readonly SRI_ENDPOINTS = [
-    'https://srienlinea.sri.gob.ec/movil-servicios-internet/rest/ConsolidadoContribuyente/obtenerPorNumerosRuc',
+    'https://srienlinea.sri.gob.ec/sri-en-linea/SriRucWeb/ConsultaRuc/Consultas/consultaRuc',
     'https://srienlinea.sri.gob.ec/sri-catastro-sujeto-servicio-internet/rest/ConsolidadoContribuyente/obtenerPorNumeroRuc',
-    'https://declaraciones.sri.gob.ec/facturacion-internet/rest/ConsolidadoContribuyente/obtenerPorNumeroRuc'
+    'https://srienlinea.sri.gob.ec/movil-servicios-internet/rest/ConsolidadoContribuyente/obtenerPorNumerosRuc'
   ];
 
   /**
@@ -162,80 +162,112 @@ export class SRIFetcher {
    */
   private static async tryFetchEndpoint(endpoint: string, ruc: string): Promise<SRICompanyData | null> {
     try {
-      // Diferentes formatos de URL según el endpoint
-      const urls = [
-        `${endpoint}?ruc=${ruc}`,
-        `${endpoint}?numeroRuc=${ruc}`,
-        `${endpoint}/${ruc}`,
-        `${endpoint}/consultar/${ruc}`
-      ];
+      console.log(`[SRI-FETCHER] Probando endpoint: ${endpoint}`);
+      
+      // Configurar headers para simular navegador real
+      const headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36',
+        'Accept': 'application/json, text/html, */*',
+        'Accept-Language': 'es-ES,es;q=0.9,en;q=0.8',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Connection': 'keep-alive',
+        'Referer': 'https://srienlinea.sri.gob.ec/',
+        'Origin': 'https://srienlinea.sri.gob.ec',
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache'
+      };
 
-      for (const url of urls) {
-        try {
-          console.log(`[SRI-FETCHER] Probando URL: ${url}`);
-          
-          // Configurar headers para simular navegador real
-          const headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36',
-            'Accept': 'application/json, text/plain, */*',
-            'Accept-Language': 'es-ES,es;q=0.9,en;q=0.8',
-            'Accept-Encoding': 'gzip, deflate, br',
-            'Connection': 'keep-alive',
-            'Referer': 'https://srienlinea.sri.gob.ec/',
-            'Origin': 'https://srienlinea.sri.gob.ec',
-            'Cache-Control': 'no-cache',
-            'Pragma': 'no-cache'
-          };
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), this.REQUEST_TIMEOUT);
 
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), this.REQUEST_TIMEOUT);
+      let response: Response;
 
-          const response = await fetch(url, {
-            method: 'GET',
-            headers,
-            signal: controller.signal,
-            mode: 'cors'
-          });
+      // Usar método específico según el endpoint
+      if (endpoint.includes('consultaRuc')) {
+        // Para el endpoint principal del SRI usar POST con form data
+        headers['Content-Type'] = 'application/x-www-form-urlencoded';
+        
+        const formData = new URLSearchParams();
+        formData.append('nruc', ruc);
+        
+        response = await fetch(endpoint, {
+          method: 'POST',
+          headers,
+          body: formData,
+          signal: controller.signal,
+          mode: 'cors'
+        });
+      } else {
+        // Para endpoints REST usar GET con parámetros
+        const urls = [
+          `${endpoint}?ruc=${ruc}`,
+          `${endpoint}?numeroRuc=${ruc}`,
+          `${endpoint}/${ruc}`
+        ];
 
-          clearTimeout(timeoutId);
-
-          if (!response.ok) {
-            console.log(`[SRI-FETCHER] HTTP ${response.status} ${response.statusText} para ${url}`);
+        let lastError: any;
+        for (const url of urls) {
+          try {
+            console.log(`[SRI-FETCHER] Probando URL: ${url}`);
+            
+            response = await fetch(url, {
+              method: 'GET',
+              headers,
+              signal: controller.signal,
+              mode: 'cors'
+            });
+            
+            clearTimeout(timeoutId);
+            break;
+          } catch (error) {
+            lastError = error;
+            console.log(`[SRI-FETCHER] Error en URL ${url}:`, error);
             continue;
           }
+        }
+        
+        if (!response!) {
+          throw lastError;
+        }
+      }
 
-          const contentType = response.headers.get('content-type');
-          let data: any;
+      if (!response.ok) {
+        console.log(`[SRI-FETCHER] HTTP ${response.status} ${response.statusText} para ${endpoint}`);
+        return null;
+      }
 
-          if (contentType?.includes('application/json')) {
-            data = await response.json();
-          } else {
-            const text = await response.text();
-            
-            // Intentar extraer JSON del HTML si es necesario
-            try {
-              data = JSON.parse(text);
-            } catch {
-              // Buscar JSON embebido en HTML
-              const jsonMatch = text.match(/\{[^{}]*"razonSocial"[^{}]*\}/);
-              if (jsonMatch) {
-                data = JSON.parse(jsonMatch[0]);
-              } else {
-                console.log(`[SRI-FETCHER] Respuesta no contiene JSON válido`);
-                continue;
-              }
+      const contentType = response.headers.get('content-type');
+      let data: any;
+
+      if (contentType?.includes('application/json')) {
+        data = await response.json();
+      } else {
+        const text = await response.text();
+        
+        // Para el endpoint principal del SRI (HTML response)
+        if (endpoint.includes('consultaRuc')) {
+          data = this.parseHTMLResponse(text, ruc);
+        } else {
+          // Intentar extraer JSON del HTML si es necesario
+          try {
+            data = JSON.parse(text);
+          } catch {
+            // Buscar JSON embebido en HTML
+            const jsonMatch = text.match(/\{[^{}]*"razonSocial"[^{}]*\}/);
+            if (jsonMatch) {
+              data = JSON.parse(jsonMatch[0]);
+            } else {
+              console.log(`[SRI-FETCHER] Respuesta no contiene JSON válido`);
+              return null;
             }
           }
-
-          // Verificar que la respuesta contiene datos válidos
-          if (data && (data.razonSocial || data.nombreComercial || data.ruc)) {
-            console.log(`[SRI-FETCHER] Datos válidos encontrados en ${url}`);
-            return this.transformSRIResponse(data, ruc);
-          }
-
-        } catch (error) {
-          console.log(`[SRI-FETCHER] Error en URL ${url}:`, error);
         }
+      }
+
+      // Verificar que la respuesta contiene datos válidos
+      if (data && (data.razonSocial || data.nombreComercial || data.ruc)) {
+        console.log(`[SRI-FETCHER] Datos válidos encontrados en ${endpoint}`);
+        return this.transformSRIResponse(data, ruc);
       }
 
       return null;
@@ -243,6 +275,56 @@ export class SRIFetcher {
     } catch (error) {
       console.log(`[SRI-FETCHER] Error general en endpoint ${endpoint}:`, error);
       throw error;
+    }
+  }
+
+  /**
+   * Parsear respuesta HTML del SRI principal
+   */
+  private static parseHTMLResponse(htmlText: string, ruc: string): any {
+    try {
+      // Buscar información en el HTML usando expresiones regulares
+      const patterns = {
+        razonSocial: /<td[^>]*>\s*Razón Social[^<]*<\/td>\s*<td[^>]*>([^<]+)<\/td>/i,
+        nombreComercial: /<td[^>]*>\s*Nombre Comercial[^<]*<\/td>\s*<td[^>]*>([^<]+)<\/td>/i,
+        estado: /<td[^>]*>\s*Estado[^<]*<\/td>\s*<td[^>]*>([^<]+)<\/td>/i,
+        tipoContribuyente: /<td[^>]*>\s*Tipo[^<]*<\/td>\s*<td[^>]*>([^<]+)<\/td>/i,
+        direccion: /<td[^>]*>\s*Dirección[^<]*<\/td>\s*<td[^>]*>([^<]+)<\/td>/i,
+        actividad: /<td[^>]*>\s*Actividad[^<]*<\/td>\s*<td[^>]*>([^<]+)<\/td>/i
+      };
+
+      const extractedData: any = { ruc };
+
+      for (const [key, pattern] of Object.entries(patterns)) {
+        const match = htmlText.match(pattern);
+        if (match && match[1]) {
+          extractedData[key] = match[1].trim();
+        }
+      }
+
+      // Si no encontramos datos, buscar otros patrones
+      if (!extractedData.razonSocial) {
+        // Buscar en otros formatos comunes del SRI
+        const alternativePatterns = [
+          /class="dato[^"]*"[^>]*>([^<]+)<\/[^>]*>\s*Razón Social/i,
+          /Razón Social[^>]*>([^<]+)</i,
+          /"razonSocial"\s*:\s*"([^"]+)"/i
+        ];
+
+        for (const pattern of alternativePatterns) {
+          const match = htmlText.match(pattern);
+          if (match && match[1]) {
+            extractedData.razonSocial = match[1].trim();
+            break;
+          }
+        }
+      }
+
+      return extractedData.razonSocial ? extractedData : null;
+      
+    } catch (error) {
+      console.log(`[SRI-FETCHER] Error parseando HTML:`, error);
+      return null;
     }
   }
 
