@@ -1,3 +1,4 @@
--r servidor/requirements.txt
+-r server/requirements.txt
+
 
 
