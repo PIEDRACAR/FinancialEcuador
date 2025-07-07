@@ -17,7 +17,7 @@ app.add_middleware(
 
 @app.get("/")
 async def root():
-    return {"message": "Backend FastAPI funcionando correctamente 🚀"}
+    return {"message": "Server FastAPI funcionando correctamente 🚀"}
 
 if __name__ == "__main__":
     import uvicorn
