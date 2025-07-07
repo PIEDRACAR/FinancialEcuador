@@ -1,2 +1,14 @@
--r servidor/requirements.txt
+fastapi
+uvicorn[standard]
+sqlalchemy
+asyncpg
+psycopg2-binary
+python-multipart
+pydantic
+passlib[bcrypt]
+email-validator
+jinja2
+python-dotenv
+httpx
+
 
