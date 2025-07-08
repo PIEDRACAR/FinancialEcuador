@@ -8,3 +8,13 @@ services:
     buildCommand: "pip install -r requirements.txt"
     startCommand: "uvicorn server.services.main:app --host 0.0.0.0 --port 10000"
     autoDeploy: true
+services:
+  - type: web
+    name: FinancialEcuadorFrontend
+    env: static
+    plan: free
+    repo: https://github.com/PIEDRACAR/FinancialEcuador
+    branch: main
+    buildCommand: "cd client && npm install && npm run build"
+    staticPublishPath: "client/build"
+    autoDeploy: true
