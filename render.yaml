@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: FinancialEcuadorAPI
+    env: python
+    plan: free
+    repo: https://github.com/PIEDRACAR/FinancialEcuador
+    branch: main
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "uvicorn server.services.main:app --host 0.0.0.0 --port 10000"
+    autoDeploy: true
