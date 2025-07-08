@@ -1,14 +1,15 @@
 services:
   - type: web
-    name: FinancialEcuadorAPI
-    env: python
+    name: FinancialEcuadorBackend
+    env: node
     plan: free
     repo: https://github.com/PIEDRACAR/FinancialEcuador
     branch: main
-    buildCommand: "pip install -r requirements.txt"
-    startCommand: "uvicorn server.services.main:app --host 0.0.0.0 --port 10000"
+    rootDir: server
+    buildCommand: "npm install"
+    startCommand: "npm run dev"
     autoDeploy: true
-services:
+
   - type: web
     name: FinancialEcuadorFrontend
     env: static
