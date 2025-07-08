@@ -5,8 +5,8 @@ services:
     plan: free
     repo: https://github.com/PIEDRACAR/FinancialEcuador
     branch: main
-    buildCommand: "npm install"
-    startCommand: "npm run dev"  # o "npm start" si usas producción
+    buildCommand: "npm install && npm run build"
+    startCommand: "npm run start"
     autoDeploy: true
 
   - type: web
